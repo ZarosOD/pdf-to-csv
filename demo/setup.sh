@@ -7,7 +7,8 @@
 
 set -euo pipefail
 
-REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+DEMO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "$DEMO_DIR/.." && pwd)"
 cd "$REPO_ROOT"
 
 VENV=".venv"
@@ -15,18 +16,27 @@ PY="$VENV/bin/python"
 
 log() { printf '  %s\n' "$*" >&2; }
 
+# Generic: fetches a pinned uv if the machine has none. See lib/uv.sh.
+# shellcheck source=lib/uv.sh
+. "$DEMO_DIR/lib/uv.sh"
+
 if [ ! -x "$PY" ]; then
-  if command -v uv >/dev/null 2>&1; then
+  if UV="$(ensure_uv)"; then
     log "creating $VENV with uv"
-    uv venv --python 3.12 "$VENV" >/dev/null
-    VIRTUAL_ENV="$REPO_ROOT/$VENV" uv pip install --quiet -e '.[dev]'
+    # --python 3.12 lets uv supply the interpreter when the machine has no
+    # 3.12 of its own, which is the whole point of bootstrapping it.
+    "$UV" venv --python 3.12 "$VENV" >/dev/null
+    VIRTUAL_ENV="$REPO_ROOT/$VENV" "$UV" pip install --quiet -e '.[dev]'
   elif python3 -m venv --help >/dev/null 2>&1 && python3 -c 'import ensurepip' 2>/dev/null; then
     log "creating $VENV with python -m venv"
     python3 -m venv "$VENV"
     "$PY" -m pip install --quiet --upgrade pip
     "$PY" -m pip install --quiet -e '.[dev]'
   else
-    echo "setup.sh: need either uv (https://astral.sh/uv) or a python3 with ensurepip" >&2
+    # Last resort: we could neither fetch uv nor use the system python.
+    echo "setup.sh: could not fetch uv (see the log above) and this python3 has no" >&2
+    echo "  ensurepip. Install uv (https://astral.sh/uv) or your distro's python3-venv" >&2
+    echo "  package, then re-run." >&2
     exit 1
   fi
 fi

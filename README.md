@@ -20,34 +20,41 @@ guessed and it never crashes the run.
 
 ## Install and run
 
-Needs Python 3.12+.
+Needs `make`, `curl` and a 64-bit Linux or macOS. That is the whole list — it
+does **not** need you to have Python 3.12, `pip` or `uv` set up first.
 
 ```bash
 git clone <this repo> && cd pdf-to-csv
-
-# with uv (https://astral.sh/uv)
-uv venv && uv pip install -e '.[dev]'
-
-# or with pip
-python3 -m venv .venv && .venv/bin/pip install -e '.[dev]'
-
-.venv/bin/python extract.py samples/ -o invoices.csv --report
+make run
 ```
 
-That last line is the whole tool. It prints:
+`make run` creates the virtualenv, installs the dependencies and extracts every
+invoice in `samples/` into `invoices.csv`. It prints:
 
 ```
 12 files, 11 parsed clean, 1 needing review
   review  09_harborview_supplies_no_total.pdf: missing: total
 ```
 
-Or in one step, if you have `make`:
-
 ```bash
-make run      # extract samples/ into invoices.csv
 make test     # run the test suite
 make demo     # regenerate the clip above, headless
 ```
+
+The first run bootstraps a pinned [uv](https://astral.sh/uv) into
+`demo/.toolchain/` if your machine has none, because a stock Ubuntu 24.04 box
+has neither `uv` nor a `python3` with `ensurepip`. Nothing is installed
+system-wide and nothing needs root. If you would rather use your own tooling:
+
+```bash
+uv venv && uv pip install -e '.[dev]'            # or:
+python3 -m venv .venv && .venv/bin/pip install -e '.[dev]'
+
+.venv/bin/python extract.py samples/ -o invoices.csv --report
+```
+
+That last line is the whole tool; everything above it is just getting a Python
+that can run it.
 
 ## What the output looks like
 

@@ -24,9 +24,14 @@ Copy the whole `demo/` folder. Then change **three files and nothing else**:
 | `setup.sh` | How to get the project runnable — the venv, `npm ci`, a build, whatever. Must be re-runnable and must leave the repo ready for the tape. |
 | `preview.py` | A display helper this piece happens to need. Delete it if yours does not. |
 
-Leave `record.sh` and `lib/bootstrap.sh` alone. They are the generic parts:
-fetching a pinned toolchain into `demo/.toolchain/`, running your setup, playing
-the tape, and checking the result.
+Leave `record.sh`, `lib/bootstrap.sh` and `lib/uv.sh` alone. They are the
+generic parts: fetching a pinned toolchain into `demo/.toolchain/`, running your
+setup, playing the tape, and checking the result.
+
+If your piece is also Python, `setup.sh` can keep its two lines of `lib/uv.sh`
+wiring as-is and you get the clean-machine bootstrap for free. If it is Node,
+apply the same rule there: fetch a pinned toolchain into `demo/.toolchain/`
+rather than assuming the machine has one.
 
 ## Writing the tape
 
@@ -54,6 +59,16 @@ system-wide and no root:
 | vhs | 0.10.0 | Records the terminal. **Pinned deliberately**: 0.12.x starts Chromium, captures every frame, then exits 0 having written no file at all on some Linux hosts. 0.10.0 encodes reliably. |
 | ttyd | 1.7.7 | The terminal vhs drives. A system `ttyd` is used if present. |
 | ffmpeg | static build | Encodes the frames. A system `ffmpeg` is used if present. |
+
+`lib/uv.sh` applies the same rule to the *project's* toolchain, because a clean
+checkout is not a clean machine. Stock Ubuntu 24.04 has no `uv` and a `python3`
+with no `ensurepip` (that lives in the separate `python3-venv` package), so
+`setup.sh` used to stop dead there and take `make test`, `make run` and
+`make demo` with it. It now fetches a pinned uv (0.12.13, checksum-verified
+against the published `.sha256`) into `demo/.toolchain/bin`. uv then supplies the
+interpreter too, so the machine does not need a python3.12 of its own. A system
+`uv` is used if present; the system `python3 -m venv` is the fallback if the
+fetch fails; the "install uv or python3-venv" error is the last resort.
 
 VHS renders through a headless Chromium it downloads itself into `~/.cache/rod`.
 On a server image that Chromium is usually missing a few shared libraries
