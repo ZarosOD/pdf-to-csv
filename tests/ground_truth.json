@@ -1,0 +1,602 @@
+[
+  {
+    "source_file": "01_northwind_print.pdf",
+    "layout": "classic",
+    "vendor": "Northwind Print Co.",
+    "invoice_number": "INV-2024-0417",
+    "invoice_date": "2024-03-15",
+    "subtotal": 521.0,
+    "tax": 42.98,
+    "total": 563.98,
+    "line_items": [
+      {
+        "description": "Business cards, 16pt matte, 500ct",
+        "quantity": 4,
+        "unit_price": 42.5,
+        "line_total": 170.0
+      },
+      {
+        "description": "Tri-fold brochure, gloss, 250ct",
+        "quantity": 2,
+        "unit_price": 138.0,
+        "line_total": 276.0
+      },
+      {
+        "description": "Rush production surcharge",
+        "quantity": 1,
+        "unit_price": 75.0,
+        "line_total": 75.0
+      }
+    ]
+  },
+  {
+    "source_file": "02_bayside_coffee.pdf",
+    "layout": "receipt",
+    "vendor": "Bayside Coffee Roasters",
+    "invoice_number": "R-88431",
+    "invoice_date": "2024-03-15",
+    "subtotal": 192.15,
+    "tax": 17.29,
+    "total": 209.44,
+    "line_items": [
+      {
+        "description": "Espresso blend 1kg",
+        "quantity": 6,
+        "unit_price": 21.75,
+        "line_total": 130.5
+      },
+      {
+        "description": "Filter papers box",
+        "quantity": 2,
+        "unit_price": 8.4,
+        "line_total": 16.8
+      },
+      {
+        "description": "Cold brew concentrate",
+        "quantity": 3,
+        "unit_price": 14.95,
+        "line_total": 44.85
+      }
+    ]
+  },
+  {
+    "source_file": "03_orbit_cloud.pdf",
+    "layout": "modern",
+    "vendor": "Orbit Cloud Services",
+    "invoice_number": "OCS-99120",
+    "invoice_date": "2024-03-15",
+    "subtotal": 230.3,
+    "tax": 0.0,
+    "total": 230.3,
+    "line_items": [
+      {
+        "description": "Compute hours, standard tier",
+        "quantity": 720,
+        "unit_price": 0.09,
+        "line_total": 64.8
+      },
+      {
+        "description": "Object storage, TB-month",
+        "quantity": 3.5,
+        "unit_price": 19.0,
+        "line_total": 66.5
+      },
+      {
+        "description": "Support plan, monthly",
+        "quantity": 1,
+        "unit_price": 99.0,
+        "line_total": 99.0
+      }
+    ]
+  },
+  {
+    "source_file": "04_ferrier_hardware.pdf",
+    "layout": "statement",
+    "vendor": "Ferrier & Sons Hardware",
+    "invoice_number": "FS/2024/1188",
+    "invoice_date": "2024-03-15",
+    "subtotal": 216.8,
+    "tax": 43.36,
+    "total": 260.16,
+    "line_items": [
+      {
+        "description": "Galvanised bolt M10 (box of 50)",
+        "quantity": 8,
+        "unit_price": 11.2,
+        "line_total": 89.6
+      },
+      {
+        "description": "Heavy duty hinge, 150mm",
+        "quantity": 12,
+        "unit_price": 6.75,
+        "line_total": 81.0
+      },
+      {
+        "description": "Threadlock compound 50ml",
+        "quantity": 3,
+        "unit_price": 9.4,
+        "line_total": 28.2
+      },
+      {
+        "description": "Delivery",
+        "quantity": 1,
+        "unit_price": 18.0,
+        "line_total": 18.0
+      }
+    ]
+  },
+  {
+    "source_file": "05_lumen_design.pdf",
+    "layout": "modern",
+    "vendor": "Lumen Design Studio",
+    "invoice_number": "2024-041",
+    "invoice_date": "2024-03-15",
+    "subtotal": 4100.0,
+    "tax": 0.0,
+    "total": 4100.0,
+    "line_items": [
+      {
+        "description": "Brand identity workshop",
+        "quantity": 1,
+        "unit_price": 1800.0,
+        "line_total": 1800.0
+      },
+      {
+        "description": "Logo concepts, 3 routes",
+        "quantity": 3,
+        "unit_price": 450.0,
+        "line_total": 1350.0
+      },
+      {
+        "description": "Style guide production",
+        "quantity": 1,
+        "unit_price": 950.0,
+        "line_total": 950.0
+      }
+    ]
+  },
+  {
+    "source_file": "06_cascade_freight_multipage.pdf",
+    "layout": "classic",
+    "vendor": "Cascade Freight LLC",
+    "invoice_number": "CF-2024-77310",
+    "invoice_date": "2024-03-18",
+    "subtotal": 8310.75,
+    "tax": 498.64,
+    "total": 8809.39,
+    "line_items": [
+      {
+        "description": "Pallet shipment leg 01, zone 2",
+        "quantity": 1,
+        "unit_price": 131.25,
+        "line_total": 131.25
+      },
+      {
+        "description": "Pallet shipment leg 02, zone 3",
+        "quantity": 1,
+        "unit_price": 134.5,
+        "line_total": 134.5
+      },
+      {
+        "description": "Pallet shipment leg 03, zone 4",
+        "quantity": 1,
+        "unit_price": 137.75,
+        "line_total": 137.75
+      },
+      {
+        "description": "Pallet shipment leg 04, zone 5",
+        "quantity": 1,
+        "unit_price": 141.0,
+        "line_total": 141.0
+      },
+      {
+        "description": "Pallet shipment leg 05, zone 1",
+        "quantity": 1,
+        "unit_price": 144.25,
+        "line_total": 144.25
+      },
+      {
+        "description": "Pallet shipment leg 06, zone 2",
+        "quantity": 1,
+        "unit_price": 147.5,
+        "line_total": 147.5
+      },
+      {
+        "description": "Pallet shipment leg 07, zone 3",
+        "quantity": 1,
+        "unit_price": 150.75,
+        "line_total": 150.75
+      },
+      {
+        "description": "Pallet shipment leg 08, zone 4",
+        "quantity": 1,
+        "unit_price": 154.0,
+        "line_total": 154.0
+      },
+      {
+        "description": "Pallet shipment leg 09, zone 5",
+        "quantity": 1,
+        "unit_price": 157.25,
+        "line_total": 157.25
+      },
+      {
+        "description": "Pallet shipment leg 10, zone 1",
+        "quantity": 1,
+        "unit_price": 160.5,
+        "line_total": 160.5
+      },
+      {
+        "description": "Pallet shipment leg 11, zone 2",
+        "quantity": 1,
+        "unit_price": 163.75,
+        "line_total": 163.75
+      },
+      {
+        "description": "Pallet shipment leg 12, zone 3",
+        "quantity": 1,
+        "unit_price": 167.0,
+        "line_total": 167.0
+      },
+      {
+        "description": "Pallet shipment leg 13, zone 4",
+        "quantity": 1,
+        "unit_price": 170.25,
+        "line_total": 170.25
+      },
+      {
+        "description": "Pallet shipment leg 14, zone 5",
+        "quantity": 1,
+        "unit_price": 173.5,
+        "line_total": 173.5
+      },
+      {
+        "description": "Pallet shipment leg 15, zone 1",
+        "quantity": 1,
+        "unit_price": 176.75,
+        "line_total": 176.75
+      },
+      {
+        "description": "Pallet shipment leg 16, zone 2",
+        "quantity": 1,
+        "unit_price": 180.0,
+        "line_total": 180.0
+      },
+      {
+        "description": "Pallet shipment leg 17, zone 3",
+        "quantity": 1,
+        "unit_price": 183.25,
+        "line_total": 183.25
+      },
+      {
+        "description": "Pallet shipment leg 18, zone 4",
+        "quantity": 1,
+        "unit_price": 186.5,
+        "line_total": 186.5
+      },
+      {
+        "description": "Pallet shipment leg 19, zone 5",
+        "quantity": 1,
+        "unit_price": 189.75,
+        "line_total": 189.75
+      },
+      {
+        "description": "Pallet shipment leg 20, zone 1",
+        "quantity": 1,
+        "unit_price": 193.0,
+        "line_total": 193.0
+      },
+      {
+        "description": "Pallet shipment leg 21, zone 2",
+        "quantity": 1,
+        "unit_price": 196.25,
+        "line_total": 196.25
+      },
+      {
+        "description": "Pallet shipment leg 22, zone 3",
+        "quantity": 1,
+        "unit_price": 199.5,
+        "line_total": 199.5
+      },
+      {
+        "description": "Pallet shipment leg 23, zone 4",
+        "quantity": 1,
+        "unit_price": 202.75,
+        "line_total": 202.75
+      },
+      {
+        "description": "Pallet shipment leg 24, zone 5",
+        "quantity": 1,
+        "unit_price": 206.0,
+        "line_total": 206.0
+      },
+      {
+        "description": "Pallet shipment leg 25, zone 1",
+        "quantity": 1,
+        "unit_price": 209.25,
+        "line_total": 209.25
+      },
+      {
+        "description": "Pallet shipment leg 26, zone 2",
+        "quantity": 1,
+        "unit_price": 212.5,
+        "line_total": 212.5
+      },
+      {
+        "description": "Pallet shipment leg 27, zone 3",
+        "quantity": 1,
+        "unit_price": 215.75,
+        "line_total": 215.75
+      },
+      {
+        "description": "Pallet shipment leg 28, zone 4",
+        "quantity": 1,
+        "unit_price": 219.0,
+        "line_total": 219.0
+      },
+      {
+        "description": "Pallet shipment leg 29, zone 5",
+        "quantity": 1,
+        "unit_price": 222.25,
+        "line_total": 222.25
+      },
+      {
+        "description": "Pallet shipment leg 30, zone 1",
+        "quantity": 1,
+        "unit_price": 225.5,
+        "line_total": 225.5
+      },
+      {
+        "description": "Pallet shipment leg 31, zone 2",
+        "quantity": 1,
+        "unit_price": 228.75,
+        "line_total": 228.75
+      },
+      {
+        "description": "Pallet shipment leg 32, zone 3",
+        "quantity": 1,
+        "unit_price": 232.0,
+        "line_total": 232.0
+      },
+      {
+        "description": "Pallet shipment leg 33, zone 4",
+        "quantity": 1,
+        "unit_price": 235.25,
+        "line_total": 235.25
+      },
+      {
+        "description": "Pallet shipment leg 34, zone 5",
+        "quantity": 1,
+        "unit_price": 238.5,
+        "line_total": 238.5
+      },
+      {
+        "description": "Pallet shipment leg 35, zone 1",
+        "quantity": 1,
+        "unit_price": 241.75,
+        "line_total": 241.75
+      },
+      {
+        "description": "Pallet shipment leg 36, zone 2",
+        "quantity": 1,
+        "unit_price": 245.0,
+        "line_total": 245.0
+      },
+      {
+        "description": "Pallet shipment leg 37, zone 3",
+        "quantity": 1,
+        "unit_price": 248.25,
+        "line_total": 248.25
+      },
+      {
+        "description": "Pallet shipment leg 38, zone 4",
+        "quantity": 1,
+        "unit_price": 251.5,
+        "line_total": 251.5
+      },
+      {
+        "description": "Pallet shipment leg 39, zone 5",
+        "quantity": 1,
+        "unit_price": 254.75,
+        "line_total": 254.75
+      },
+      {
+        "description": "Pallet shipment leg 40, zone 1",
+        "quantity": 1,
+        "unit_price": 258.0,
+        "line_total": 258.0
+      },
+      {
+        "description": "Pallet shipment leg 41, zone 2",
+        "quantity": 1,
+        "unit_price": 261.25,
+        "line_total": 261.25
+      },
+      {
+        "description": "Pallet shipment leg 42, zone 3",
+        "quantity": 1,
+        "unit_price": 264.5,
+        "line_total": 264.5
+      }
+    ]
+  },
+  {
+    "source_file": "07_pike_street_deli.pdf",
+    "layout": "receipt",
+    "vendor": "Pike Street Deli",
+    "invoice_number": "0004-2291",
+    "invoice_date": "2024-03-18",
+    "subtotal": 244.0,
+    "tax": 24.64,
+    "total": 268.64,
+    "line_items": [
+      {
+        "description": "Catering tray, sandwiches",
+        "quantity": 2,
+        "unit_price": 64.0,
+        "line_total": 128.0
+      },
+      {
+        "description": "Side salad, large",
+        "quantity": 4,
+        "unit_price": 18.5,
+        "line_total": 74.0
+      },
+      {
+        "description": "Beverage service",
+        "quantity": 1,
+        "unit_price": 42.0,
+        "line_total": 42.0
+      }
+    ]
+  },
+  {
+    "source_file": "08_vector_analytics.pdf",
+    "layout": "statement",
+    "vendor": "Vector Analytics Ltd",
+    "invoice_number": "VA-0031-24",
+    "invoice_date": "2024-03-20",
+    "subtotal": 4740.0,
+    "tax": 948.0,
+    "total": 5688.0,
+    "line_items": [
+      {
+        "description": "Data pipeline audit",
+        "quantity": 1,
+        "unit_price": 2400.0,
+        "line_total": 2400.0
+      },
+      {
+        "description": "Dashboard build, per screen",
+        "quantity": 5,
+        "unit_price": 380.0,
+        "line_total": 1900.0
+      },
+      {
+        "description": "Handover session",
+        "quantity": 2,
+        "unit_price": 220.0,
+        "line_total": 440.0
+      }
+    ]
+  },
+  {
+    "source_file": "09_harborview_supplies_no_total.pdf",
+    "layout": "classic",
+    "vendor": "Harborview Supplies",
+    "invoice_number": "HV-5521",
+    "invoice_date": "2024-03-21",
+    "subtotal": 452.5,
+    "tax": 31.68,
+    "total": null,
+    "line_items": [
+      {
+        "description": "Packing tape, 48mm (case)",
+        "quantity": 5,
+        "unit_price": 27.6,
+        "line_total": 138.0
+      },
+      {
+        "description": "Stretch wrap roll",
+        "quantity": 10,
+        "unit_price": 14.25,
+        "line_total": 142.5
+      },
+      {
+        "description": "Corrugated mailer, medium",
+        "quantity": 200,
+        "unit_price": 0.86,
+        "line_total": 172.0
+      }
+    ]
+  },
+  {
+    "source_file": "10_meridian_auto_parts.pdf",
+    "layout": "classic",
+    "vendor": "Meridian Auto Parts",
+    "invoice_number": "MAP 24-0876",
+    "invoice_date": "2024-03-22",
+    "subtotal": 404.3,
+    "tax": 35.38,
+    "total": 439.68,
+    "line_items": [
+      {
+        "description": "Brake pad set, front",
+        "quantity": 2,
+        "unit_price": 88.4,
+        "line_total": 176.8
+      },
+      {
+        "description": "Oil filter",
+        "quantity": 6,
+        "unit_price": 12.15,
+        "line_total": 72.9
+      },
+      {
+        "description": "Synthetic oil 5W-30, 5qt",
+        "quantity": 4,
+        "unit_price": 34.9,
+        "line_total": 139.6
+      },
+      {
+        "description": "Shop supplies",
+        "quantity": 1,
+        "unit_price": 15.0,
+        "line_total": 15.0
+      }
+    ]
+  },
+  {
+    "source_file": "11_stonebridge_courier.pdf",
+    "layout": "modern",
+    "vendor": "Stonebridge Courier Network",
+    "invoice_number": "SCN/24/0455",
+    "invoice_date": "2024-03-22",
+    "subtotal": 360.5,
+    "tax": 18.03,
+    "total": 378.53,
+    "line_items": [
+      {
+        "description": "Same-day delivery, metro",
+        "quantity": 14,
+        "unit_price": 22.0,
+        "line_total": 308.0
+      },
+      {
+        "description": "Oversize parcel handling",
+        "quantity": 3,
+        "unit_price": 17.5,
+        "line_total": 52.5
+      }
+    ]
+  },
+  {
+    "source_file": "12_greywater_utilities.pdf",
+    "layout": "statement",
+    "vendor": "Greywater Utilities Board",
+    "invoice_number": "GU-2024-003914",
+    "invoice_date": "2024-03-25",
+    "subtotal": 377.2,
+    "tax": 47.15,
+    "total": 424.35,
+    "line_items": [
+      {
+        "description": "Metered supply, 000 litres",
+        "quantity": 138,
+        "unit_price": 1.42,
+        "line_total": 195.96
+      },
+      {
+        "description": "Standing charge, quarterly",
+        "quantity": 1,
+        "unit_price": 46.0,
+        "line_total": 46.0
+      },
+      {
+        "description": "Wastewater treatment",
+        "quantity": 138,
+        "unit_price": 0.98,
+        "line_total": 135.24
+      }
+    ]
+  }
+]

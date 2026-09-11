@@ -1,0 +1,24 @@
+[project]
+name = "pdf-to-csv"
+version = "0.1.0"
+description = "Extract structured invoice/receipt data from text-layer PDFs into a flat CSV."
+requires-python = ">=3.12"
+dependencies = [
+    "pdfplumber==0.11.4",
+]
+
+[project.optional-dependencies]
+dev = [
+    "reportlab==4.2.5",
+    "pytest==8.3.3",
+]
+
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["pdf_to_csv"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
