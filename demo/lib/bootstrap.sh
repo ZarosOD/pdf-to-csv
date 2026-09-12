@@ -16,7 +16,19 @@ set -euo pipefail
 # pinned rather than tracking latest.
 VHS_VERSION="0.10.0"
 TTYD_VERSION="1.7.7"
-FFMPEG_URL="https://johnvansickle.com/ffmpeg/releases/ffmpeg-release-amd64-static.tar.xz"
+
+# ffmpeg is pinned the way vhs and ttyd are. What the clip looks like is a
+# function of the encoder — palettegen and paletteuse defaults move between
+# releases — and a clip `make demo` cannot reproduce is a clip nobody can
+# re-cut. johnvansickle publishes the newest build under a "release" alias *and*
+# under a versioned name; asking for the versioned one and checking it against a
+# literal checksum means a swapped tarball fails loudly instead of quietly
+# changing the recording. The checksum is a constant here rather than a sibling
+# file fetched from the same origin, which is what makes it a pin and not just a
+# corruption check.
+FFMPEG_VERSION="7.0.2"
+FFMPEG_URL="https://johnvansickle.com/ffmpeg/releases/ffmpeg-${FFMPEG_VERSION}-amd64-static.tar.xz"
+FFMPEG_SHA256="abda8d77ce8309141f83ab8edf0596834087c52467f6badf376a6a2a4c87cf67"
 
 TOOLCHAIN_DIR="${TOOLCHAIN_DIR:?bootstrap.sh needs TOOLCHAIN_DIR}"
 TOOLCHAIN_BIN="$TOOLCHAIN_DIR/bin"
@@ -47,13 +59,45 @@ ensure_ttyd() {
   chmod 0755 "$TOOLCHAIN_BIN/ttyd"
 }
 
+# An ffmpeg already on PATH is only worth using if it is the version we pinned.
+# Anything else falls through to the download rather than silently recording a
+# different-looking clip.
+ffmpeg_version_matches() {
+  local reported
+  reported="$("$1" -version 2>/dev/null | head -1 | cut -d' ' -f3)" || return 1
+  case "$reported" in "$FFMPEG_VERSION" | "$FFMPEG_VERSION"-*) return 0 ;; esac
+  return 1
+}
+
+ffmpeg_verify_checksum() {
+  local tarball="$1" actual
+  if have sha256sum; then
+    actual="$(sha256sum "$tarball" | cut -d' ' -f1)"
+  elif have shasum; then
+    actual="$(shasum -a 256 "$tarball" | cut -d' ' -f1)"
+  else
+    log "no sha256sum or shasum available; skipping checksum verification"
+    return 0
+  fi
+  [ "$actual" = "$FFMPEG_SHA256" ]
+}
+
 ensure_ffmpeg() {
-  if have ffmpeg; then return 0; fi
-  [ -x "$TOOLCHAIN_BIN/ffmpeg" ] && return 0
-  log "fetching ffmpeg (static build)"
+  # The build we vendored wins: once it is here, it is the one the committed
+  # clip was cut with.
+  [ -x "$TOOLCHAIN_BIN/ffmpeg" ] && [ -x "$TOOLCHAIN_BIN/ffprobe" ] && return 0
+  if have ffmpeg && have ffprobe && ffmpeg_version_matches "$(command -v ffmpeg)"; then
+    return 0
+  fi
+  log "fetching ffmpeg $FFMPEG_VERSION (static build)"
   local work
   work="$(mktemp -d)"
   curl -fsSL "$FFMPEG_URL" -o "$work/ffmpeg.tar.xz"
+  if ! ffmpeg_verify_checksum "$work/ffmpeg.tar.xz"; then
+    log "checksum mismatch on the ffmpeg download; refusing to use it"
+    rm -rf "$work"
+    return 1
+  fi
   tar xf "$work/ffmpeg.tar.xz" -C "$work"
   find "$work" -maxdepth 2 -name ffmpeg -type f -exec install -m 0755 {} "$TOOLCHAIN_BIN/ffmpeg" \;
   find "$work" -maxdepth 2 -name ffprobe -type f -exec install -m 0755 {} "$TOOLCHAIN_BIN/ffprobe" \;
