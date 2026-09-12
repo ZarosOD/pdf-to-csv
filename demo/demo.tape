@@ -6,7 +6,12 @@
 #
 # Tape syntax: https://github.com/charmbracelet/vhs#vhs-command-reference
 
+# Two outputs, one recording: vhs encodes the same captured frames to each.
+# The GIF is the README thumbnail; the MP4 is the portfolio cover, because
+# Upwork's gallery renders an uploaded GIF as a single static frame. Both come
+# from the same run, so they can never disagree about what the demo showed.
 Output demo/out/demo.gif
+Output demo/out/demo.mp4
 
 Set Shell bash
 Set FontSize 16

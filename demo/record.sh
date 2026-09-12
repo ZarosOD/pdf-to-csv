@@ -51,7 +51,21 @@ if ! play_tape; then
   play_tape
 fi
 
-CLIP="$(find "$OUT_DIR" -maxdepth 1 -type f \( -name '*.gif' -o -name '*.mp4' \) | head -1)"
+# vhs exits 0 having written nothing on some Linux boxes (see lib/bootstrap.sh),
+# and it does that per Output line. Check every target the tape names rather
+# than trusting the exit code, or a missing MP4 ships quietly.
+MISSING=0
+while read -r target; do
+  [ -n "$target" ] || continue
+  if [ ! -s "$REPO_ROOT/$target" ]; then
+    echo "record.sh: the tape names $target but vhs wrote no such file" >&2
+    MISSING=1
+  fi
+done <<<"$(grep -E '^[[:space:]]*Output[[:space:]]' "$TAPE" | awk '{print $2}')"
+[ "$MISSING" -eq 0 ] || exit 1
+
+# sort, so the file the duration is reported for is the same one every run.
+CLIP="$(find "$OUT_DIR" -maxdepth 1 -type f \( -name '*.gif' -o -name '*.mp4' \) | sort | head -1)"
 if [ -z "$CLIP" ] || [ ! -s "$CLIP" ]; then
   echo "record.sh: the tape produced no clip" >&2
   exit 1
@@ -63,10 +77,17 @@ else
   DURATION=""
 fi
 
-SIZE="$(du -h "$CLIP" | cut -f1)"
-say "wrote ${CLIP#"$REPO_ROOT"/} (${SIZE}${DURATION:+, ${DURATION%.*}s})"
+# Report every file the tape produced, not only the one the duration is
+# measured from, so the operator can see the MP4 landed too.
+for file in "$OUT_DIR"/*; do
+  [ -f "$file" ] || continue
+  say "wrote ${file#"$REPO_ROOT"/} ($(du -h "$file" | cut -f1))"
+done
 
 if [ -n "$DURATION" ] && [ "${DURATION%.*}" -gt "$MAX_SECONDS" ]; then
   echo "record.sh: clip is ${DURATION%.*}s, over the ${MAX_SECONDS}s budget" >&2
   exit 1
+fi
+if [ -n "$DURATION" ]; then
+  say "clip is ${DURATION%.*}s, inside the ${MAX_SECONDS}s budget"
 fi

@@ -6,8 +6,17 @@ One command regenerates the clip from scratch, headless, from a clean checkout:
 ./demo/record.sh
 ```
 
-It writes `demo/out/demo.gif` and fails loudly if the clip is missing, empty, or
-longer than 35 seconds. No screen capture, no window manager, no display server.
+It writes `demo/out/demo.gif` **and** `demo/out/demo.mp4`, and fails loudly if
+either is missing or empty, or if the clip runs longer than 35 seconds. No
+screen capture, no window manager, no display server.
+
+The two formats are for different places, and neither is generated from the
+other — they are two encodes of the same captured frames, so they cannot drift
+apart. The **GIF** is the README thumbnail: it animates inline on GitHub and
+needs no player. The **MP4** is the portfolio cover, because Upwork's gallery
+renders an uploaded GIF as a single static first frame. Both come from the
+`Output` lines at the top of `demo.tape`; add or remove one there and
+`record.sh` checks whatever the tape now names.
 
 Terminal tools are recorded with [VHS](https://github.com/charmbracelet/vhs).
 Anything with a browser or a web UI should use Playwright video instead; the
