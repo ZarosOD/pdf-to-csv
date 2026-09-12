@@ -33,9 +33,9 @@ Copy the whole `demo/` folder. Then change **three files and nothing else**:
 | `setup.sh` | How to get the project runnable — the venv, `npm ci`, a build, whatever. Must be re-runnable and must leave the repo ready for the tape. |
 | `preview.py` | A display helper this piece happens to need. Delete it if yours does not. |
 
-Leave `record.sh`, `lib/bootstrap.sh` and `lib/uv.sh` alone. They are the
-generic parts: fetching a pinned toolchain into `demo/.toolchain/`, running your
-setup, playing the tape, and checking the result.
+Leave `record.sh`, `lib/bootstrap.sh`, `lib/fetch.sh` and `lib/uv.sh` alone.
+They are the generic parts: fetching a pinned toolchain into `demo/.toolchain/`,
+running your setup, playing the tape, and checking the result.
 
 If your piece is also Python, `setup.sh` can keep its two lines of `lib/uv.sh`
 wiring as-is and you get the clean-machine bootstrap for free. If it is Node,
@@ -67,7 +67,15 @@ system-wide and no root:
 | --- | --- | --- |
 | vhs | 0.10.0 | Records the terminal. **Pinned deliberately**: 0.12.x starts Chromium, captures every frame, then exits 0 having written no file at all on some Linux hosts. 0.10.0 encodes reliably. |
 | ttyd | 1.7.7 | The terminal vhs drives. A system `ttyd` is used if present. |
-| ffmpeg | static build | Encodes the frames. A system `ffmpeg` is used if present. |
+| ffmpeg | 7.0.2 | Encodes the frames. Checksum-verified against a constant in `bootstrap.sh`, so a swapped tarball fails loudly instead of quietly changing what the clip looks like — what the clip looks like is a function of the encoder, and palettegen defaults move between releases. A system `ffmpeg` is used only if it reports this same version; the vendored build wins over it. |
+
+Every one of those downloads goes through `lib/fetch.sh`: a few attempts, a
+widening gap between them, and a message that separates "the host is having a
+moment" from "the URL is wrong". It exists because GitHub's release CDN returned
+HTTP 500 on the ttyd asset for a couple of minutes on 2026-09-11 and took
+`make demo` down with it. Failure is fatal for vhs, ttyd and ffmpeg — there is
+no recording without them — and a fallback for uv, which can still try
+`python3 -m venv`.
 
 `lib/uv.sh` applies the same rule to the *project's* toolchain, because a clean
 checkout is not a clean machine. Stock Ubuntu 24.04 has no `uv` and a `python3`

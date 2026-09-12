@@ -145,11 +145,13 @@ page, which is what the end-to-end tests assert against.
 make test          # or: .venv/bin/python -m pytest -q
 ```
 
-190 tests. `tests/test_parse.py` covers the parsing rules on plain text,
+196 tests. `tests/test_parse.py` covers the parsing rules on plain text,
 `tests/test_samples.py` checks every sample PDF against the generator's ground
 truth, `tests/test_cli.py` covers the CSV shape, the report line and the exit
-codes, and `tests/test_demo_outputs.py` checks the recording writes both the
-GIF and the MP4 the tape asks for.
+codes, `tests/test_demo_outputs.py` checks the recording writes both the
+GIF and the MP4 the tape asks for, and `tests/test_demo_fetch.py` drives the
+download retry ladder in `demo/lib/fetch.sh` against a `curl` shim that fails a
+scripted number of times.
 
 ## Recording the demo
 

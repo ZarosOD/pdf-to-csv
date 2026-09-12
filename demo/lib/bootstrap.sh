@@ -30,6 +30,9 @@ FFMPEG_VERSION="7.0.2"
 FFMPEG_URL="https://johnvansickle.com/ffmpeg/releases/ffmpeg-${FFMPEG_VERSION}-amd64-static.tar.xz"
 FFMPEG_SHA256="abda8d77ce8309141f83ab8edf0596834087c52467f6badf376a6a2a4c87cf67"
 
+# shellcheck source=fetch.sh
+. "$(dirname "${BASH_SOURCE[0]}")/fetch.sh"
+
 TOOLCHAIN_DIR="${TOOLCHAIN_DIR:?bootstrap.sh needs TOOLCHAIN_DIR}"
 TOOLCHAIN_BIN="$TOOLCHAIN_DIR/bin"
 TOOLCHAIN_SYSROOT="$TOOLCHAIN_DIR/sysroot"
@@ -43,7 +46,12 @@ ensure_vhs() {
   local url="https://github.com/charmbracelet/vhs/releases/download/v${VHS_VERSION}/vhs_${VHS_VERSION}_Linux_x86_64.tar.gz"
   local work
   work="$(mktemp -d)"
-  curl -fsSL "$url" -o "$work/vhs.tar.gz"
+  # Fatal, not a fallback: there is no recording without vhs. fetch_url has
+  # already retried and explained itself, so just stop.
+  if ! fetch_url "$url" "$work/vhs.tar.gz"; then
+    rm -rf "$work"
+    return 1
+  fi
   tar xzf "$work/vhs.tar.gz" -C "$work"
   find "$work" -name vhs -type f -exec install -m 0755 {} "$TOOLCHAIN_BIN/vhs" \;
   rm -rf "$work"
@@ -53,9 +61,11 @@ ensure_ttyd() {
   if have ttyd; then return 0; fi
   [ -x "$TOOLCHAIN_BIN/ttyd" ] && return 0
   log "fetching ttyd $TTYD_VERSION"
-  curl -fsSL \
+  # This is the asset whose CDN returned 500 for a couple of minutes on
+  # 2026-09-11 and took `make demo` down with it. See lib/fetch.sh.
+  fetch_url \
     "https://github.com/tsl0922/ttyd/releases/download/${TTYD_VERSION}/ttyd.x86_64" \
-    -o "$TOOLCHAIN_BIN/ttyd"
+    "$TOOLCHAIN_BIN/ttyd" || return 1
   chmod 0755 "$TOOLCHAIN_BIN/ttyd"
 }
 
@@ -92,7 +102,10 @@ ensure_ffmpeg() {
   log "fetching ffmpeg $FFMPEG_VERSION (static build)"
   local work
   work="$(mktemp -d)"
-  curl -fsSL "$FFMPEG_URL" -o "$work/ffmpeg.tar.xz"
+  if ! fetch_url "$FFMPEG_URL" "$work/ffmpeg.tar.xz"; then
+    rm -rf "$work"
+    return 1
+  fi
   if ! ffmpeg_verify_checksum "$work/ffmpeg.tar.xz"; then
     log "checksum mismatch on the ffmpeg download; refusing to use it"
     rm -rf "$work"
