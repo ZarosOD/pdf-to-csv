@@ -94,5 +94,7 @@ how to verify the from-nothing path still works.
 - x86_64 Linux. The pinned ttyd and ffmpeg URLs are architecture-specific;
   macOS would need `brew install vhs ttyd ffmpeg` and a small edit to
   `bootstrap.sh`.
-- First run downloads roughly 200 MB (Chromium) and takes a few minutes. Later
-  runs take about 40 seconds.
+- The first run downloads a headless Chromium into `~/.cache/rod`, which is most
+  of the wait. Measured from a dead clone with an empty `HOME` and
+  `PATH=/usr/bin:/bin`: about 75 s from nothing, about 47 s to re-record once
+  the toolchain is there. The download is the variable, not the recording.
