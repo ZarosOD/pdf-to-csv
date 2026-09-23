@@ -158,10 +158,11 @@ host it prints the library names and stops rather than guessing.
 - **x86_64 Linux.** The pinned ttyd and ffmpeg URLs are architecture-specific.
   macOS would need `brew install vhs ttyd ffmpeg` and a small edit.
 - **The first run downloads a browser.** Measured on the machine this was
-  recorded on: about 25 s to re-record once the toolchain is there, and the
-  first run adds a ~170 MB Chromium download on top. The download is the
-  variable, not the recording. The whole toolchain is 784 MB, all inside the
-  repo; `make clean` removes it.
+  recorded on: about 23 s to re-record once the toolchain is there (22.8, 22.8,
+  22.8 over three runs), and the first run adds the Chromium download on top,
+  which has not been timed — the download is the variable, not the recording.
+  The whole toolchain is 760 MB, 549 MB of it the unpacked Chromium, all inside
+  the repo; `make clean` removes it.
 - **Synthetic data only.** Every invoice, vendor and customer in the clip is
   invented and comes out of `samples/generate_samples.py`. Check every frame
   before shipping.

@@ -210,10 +210,12 @@ piece uses the browser one, because the clip ends on `invoices.xlsx` open in a
 spreadsheet grid and only a browser renders one. `make demo-terminal` records
 the terminal telling into `demo/out-terminal/`.
 
-Measured on this machine: **25 seconds** to re-record once the toolchain is
-there; the first run adds a ~170 MB headless Chromium download on top, and the
-whole toolchain is 784 MB inside `demo/.toolchain/`, none of it installed
-system-wide. `make clean` removes it.
+Measured on this machine: **23 seconds** to re-record once the toolchain is
+there (22.8, 22.8, 22.8 over three runs); the first run adds the headless
+Chromium download on top, which I have not timed, so the wall clock for a first
+`make demo` is the one number here I cannot give you. The whole toolchain is
+760 MB inside `demo/.toolchain/` — 549 MB of that the unpacked Chromium — none
+of it installed system-wide. `make clean` removes it.
 
 **Both ends of the clip are real files.** The opening frame renders page 1 of
 an actual `samples/*.pdf` with pypdfium2 — the document, not a picture of one.
