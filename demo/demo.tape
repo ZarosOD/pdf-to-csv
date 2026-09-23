@@ -1,17 +1,17 @@
-# The recipe for this portfolio piece's clip. This is the file you rewrite for
-# a new piece; demo/record.sh and demo/lib/bootstrap.sh stay as they are.
+# The terminal telling of the same story, for the VHS recipe.
+# EDIT THIS FILE for a new piece that records a terminal.
 #
-# Played by: ./demo/record.sh   (never run `vhs` against it by hand, the
-# toolchain and the project setup are what record.sh puts in place first)
+#   DEMO_RECIPE=vhs DEMO_OUT_DIR=demo/out-terminal ./demo/record.sh
+#
+# Never run `vhs` against it by hand: the toolchain and the project setup are
+# what record.sh puts in place first.
 #
 # Tape syntax: https://github.com/charmbracelet/vhs#vhs-command-reference
 
-# Two outputs, one recording: vhs encodes the same captured frames to each.
-# The GIF is the README thumbnail; the MP4 is the portfolio cover, because
-# Upwork's gallery renders an uploaded GIF as a single static frame. Both come
-# from the same run, so they can never disagree about what the demo showed.
-Output demo/out/demo.gif
-Output demo/out/demo.mp4
+# There is no `Output` line on purpose: demo/record.sh passes `vhs -o` so the
+# clip lands in whichever output directory it was asked for, and the Playwright
+# clip in demo/out/ does not get overwritten. Running `vhs demo/demo.tape` by
+# hand writes ./out.gif instead.
 
 Set Shell bash
 Set FontSize 16

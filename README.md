@@ -37,8 +37,9 @@ invoice in `samples/` into `invoices.csv`. It prints:
 ```
 
 ```bash
-make test     # run the test suite
-make demo     # regenerate the clip above, headless
+make test           # run the test suite
+make demo           # regenerate the clip above, headless
+make demo-terminal  # the same story recorded as a terminal session instead
 ```
 
 The first run bootstraps a pinned [uv](https://astral.sh/uv) into
@@ -145,19 +146,40 @@ page, which is what the end-to-end tests assert against.
 make test          # or: .venv/bin/python -m pytest -q
 ```
 
-196 tests. `tests/test_parse.py` covers the parsing rules on plain text,
+253 tests, plus 4 that skip without `openpyxl`. `tests/test_parse.py` covers the parsing rules on plain text,
 `tests/test_samples.py` checks every sample PDF against the generator's ground
-truth, `tests/test_cli.py` covers the CSV shape, the report line and the exit
-codes, `tests/test_demo_outputs.py` checks the recording writes both the
-GIF and the MP4 the tape asks for, and `tests/test_demo_fetch.py` drives the
-download retry ladder in `demo/lib/fetch.sh` against a `curl` shim that fails a
-scripted number of times.
+truth, and `tests/test_cli.py` covers the CSV shape, the report line and the
+exit codes.
+
+Three cover the recording rather than the tool. `tests/test_demo_outputs.py`
+checks it writes both the GIF and the MP4, including the case where `vhs` exits
+`0` having skipped one. `tests/test_demo_fetch.py` drives the download retry
+ladder in `demo/lib/fetch.sh` against a `curl` shim that fails a scripted
+number of times. `tests/test_demo_sheet.py` covers the shared spreadsheet
+renderer in `demo/lib/sheet.py`: that it refuses to render a file that is not
+on disk, that a filtered view keeps the source file's own column letters and
+row numbers, and that the command on screen is the one whose output is under
+it.
 
 ## Recording the demo
 
 `./demo/record.sh` regenerates the clip at the top of this file from scratch,
-headless, on the synthetic samples. It is a reusable pipeline — see
-[demo/README.md](demo/README.md).
+headless, on the synthetic samples. It is a reusable pipeline with two recipes —
+a browser one and a terminal one — see [demo/README.md](demo/README.md). This
+piece uses the browser one, because the clip ends on `invoices.csv` open in a
+spreadsheet grid and only a browser renders one. `make demo-terminal` records
+the terminal telling into `demo/out-terminal/`.
+
+Measured on this machine: **25 seconds** to re-record once the toolchain is
+there; the first run adds a ~170 MB headless Chromium download on top, and the
+whole toolchain is 784 MB inside `demo/.toolchain/`, none of it installed
+system-wide. `make clean` removes it.
+
+**Both ends of the clip are real files.** The opening frame renders page 1 of
+an actual `samples/*.pdf` with pypdfium2 — the document, not a picture of one.
+The closing frame opens the `invoices.csv` that the run in the middle just
+wrote and reads it off disk. If the run does not write it, the recording fails
+rather than showing you a table that was never extracted.
 
 ## Layout
 

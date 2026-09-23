@@ -1,0 +1,11 @@
+# Which recording recipe demo/record.sh uses. One of the names in demo/lib/.
+#
+# playwright — this piece. The deliverable is a CSV the client opens in a
+#              spreadsheet, so the clip opens it: demo/scene.py renders a real
+#              sample invoice and then invoices.csv in a grid, both read off
+#              disk. See demo/scene.py.
+#
+# vhs        — the terminal sibling, still here and still working. Try it with
+#              DEMO_RECIPE=vhs DEMO_OUT_DIR=demo/out-terminal ./demo/record.sh
+#              and see demo/demo.tape.
+playwright

@@ -1,6 +1,15 @@
 .venv/
 __pycache__/
+*.pyc
 *.egg-info/
 .pytest_cache/
+/build/
 invoices.csv
+
+# Fetched toolchains and demo scratch. demo/out/ is committed on purpose: the
+# clip is part of the deliverable. demo/out-terminal/ is the VHS sibling's
+# output and is not committed — regenerate it with `make demo-terminal`.
 demo/.toolchain/
+demo/.scratch/
+demo/out/raw/
+demo/out-terminal/

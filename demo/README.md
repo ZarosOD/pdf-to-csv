@@ -1,108 +1,164 @@
 # demo/ — the recording pipeline
 
-One command regenerates the clip from scratch, headless, from a clean checkout:
+One command regenerates a clip from scratch, headless, from a clean checkout:
 
 ```bash
-./demo/record.sh
+./demo/record.sh              # this piece: Playwright, a rendered page
+./demo/record.sh --clean      # throw the toolchain away and re-fetch it first
 ```
 
-It writes `demo/out/demo.gif` **and** `demo/out/demo.mp4`, and fails loudly if
-either is missing or empty, or if the clip runs longer than 35 seconds. No
-screen capture, no window manager, no display server.
+No screen capture, no window manager, no display server, no root. Everything
+the recording needs is fetched into `demo/.toolchain/` and nothing is installed
+system-wide. `record.sh` fails loudly if the clip is missing, empty, or longer
+than 35 seconds.
 
-The two formats are for different places, and neither is generated from the
-other — they are two encodes of the same captured frames, so they cannot drift
-apart. The **GIF** is the README thumbnail: it animates inline on GitHub and
-needs no player. The **MP4** is the portfolio cover, because Upwork's gallery
-renders an uploaded GIF as a single static first frame. Both come from the
-`Output` lines at the top of `demo.tape`; add or remove one there and
-`record.sh` checks whatever the tape now names.
+It writes `demo/out/demo.gif` **and** `demo/out/demo.mp4`. The two formats are
+for different places, and neither is generated from the other — they are two
+encodes of the same captured frames, so they cannot drift apart. The **GIF** is
+the README thumbnail: it animates inline on GitHub and needs no player. The
+**MP4** is the portfolio cover, because Upwork's gallery renders an uploaded GIF
+as a single static first frame.
 
-Terminal tools are recorded with [VHS](https://github.com/charmbracelet/vhs).
-Anything with a browser or a web UI should use Playwright video instead; the
-split is deliberate, VHS gives crisp text at small sizes and Playwright gives a
-real page.
+**This piece was the last one on the old pipeline.** It shipped before
+`demo/lib/` was split into recipes, so it carried a single `lib/bootstrap.sh`
+that fetched vhs, ttyd and ffmpeg, and a `record.sh` that played a tape rather
+than picking a recipe. Seven entries in `tools/demo_lib_drift.py`'s `EXCEPTIONS`
+existed to say so. It now carries the same `record.sh` and the same `lib/` as
+the other three, `bootstrap.sh` is gone, and those seven exceptions are gone
+with it — an exception whose reason has been fixed is not a note, it is a hole
+that will excuse the next real difference.
+
+## The spreadsheet renderer, `lib/sheet.py`
+
+All four pieces end their clip on the file the run just wrote, open in a
+spreadsheet grid. That is one job, so it is one file — shared, byte-identical
+everywhere, and policed by `tools/demo_lib_drift.py` like the rest of `lib/`.
+What stays per-piece is `scene.py`: which files this piece opens, which of its
+columns are worth showing, and what the narration says.
+
+**It cannot render a table it was handed.** The only way in is
+`read_table(path)` or `read_dir(path)`, both of which open something real and
+raise if it is not there. `View` cannot be built without a `Table` and `Table`
+cannot be built without a file on disk. That is deliberate: a terminal ASCII
+table cannot be told apart from a mock-up, and a renderer that reads a fixture
+reproduces exactly that flaw with better borders.
+
+**A filtered view says it is filtered.** Showing ten of fifteen columns is fine
+and is normal — nobody wants fifteen on screen. So the columns keep the letter
+they have in the source file (picking columns 1, 2, 4 and 9 renders as A, B, D,
+I, which is what hiding columns in Excel looks like), rows keep their real sheet
+row number so a filtered set reads 2, 3, 4, 66, 67 with the join marked, and the
+footer says how many of each are on screen out of how many are in the file.
+
+**The number format is honoured.** A price cell holding 1299 with a `0.00`
+format reads "1299.00" in Excel and "1299" if you only look at the value —
+while a CSV beside it would say "1299.00". Rendering the value alone would put a
+difference on screen that does not exist in the file.
+
+**The command and its output come from one call.** `run_command` runs the argv,
+keeps the captured stdout with it, and `terminal_html` renders that one object —
+so the line on screen cannot drift from the output underneath it. The
+interpreter path is the one thing rewritten, to `python`, because
+`/home/somebody/repo/.venv/bin/python3.12` is machine-specific noise and not the
+thing being demonstrated.
+
+Covered by `tests/test_demo_sheet.py`, which is byte-identical in all four repos
+for the same reason the module is.
+
+## Which recipe
+
+**All four pieces use Playwright today**, and the reason is the grid above: a
+spreadsheet frame is a rendered page, and the terminal recipe cannot draw one.
+This piece records a browser twice over: it opens on a real page of a sample PDF
+and closes on `invoices.csv` in the grid. The VHS sibling is still live in every
+repo — `make demo-terminal` — because the choice is the point of `demo/recipe`
+and a recipe nobody can run is a recipe that has rotted.
+
+| | **VHS** (`lib/vhs.sh`) | **Playwright** (`lib/playwright.sh`) |
+| --- | --- | --- |
+| Records | A terminal session | A real browser page |
+| You write | `demo.tape` — a script of keystrokes and pauses | `scene.py` — Playwright code |
+| Good at | Crisp text at small sizes; small files | Anything with a UI, a page, a document or a grid |
+| Bad at | Anything that is not text in a terminal | Files are several times bigger |
+| Timing | Declarative `Sleep 4s` | `page.wait_for_timeout(4000)` — same idea, in Python |
+| Output | GIF **and** MP4, from one recording | GIF **and** MP4, from one recording |
+
+## The scene
+
+`scene.py` is four beats, in the shape all four clips share — a BEFORE, one
+command, and an AFTER that is held long enough to read:
+
+1. **BEFORE** `samples/`, listed off disk: twelve PDFs from twelve vendors.
+2. **BEFORE** one of them, rendered. The listing says there are twelve
+   documents; this says what a document looks like, and it is the frame that
+   makes "no per-vendor templates" mean something.
+3. **The command**, and the real stdout it printed.
+4. **AFTER** `invoices.csv` in the grid, with the flagged rows on screen.
+
+Beat 2 renders the page with `pypdfium2`, which `pdfplumber` already brings in,
+so it adds no dependency the piece did not have. A4 is 1:1.41 and the frame is
+16:9, so a whole page fits at about a third of the width and nothing on it can
+be read — the margins are cropped away, and if it is still too tall the bottom
+goes and **the caption says so**. A cropped page presented as a whole one is
+exactly the kind of small lie this clip exists to avoid.
 
 ## Copying this into another piece
 
-Copy the whole `demo/` folder. Then change **three files and nothing else**:
+Copy the whole `demo/` folder. Then change **these files and nothing else**:
 
 | File | What to change |
 | --- | --- |
-| `demo.tape` | The whole recipe: what gets typed, the pauses, the frame size. This is the piece. |
-| `setup.sh` | How to get the project runnable — the venv, `npm ci`, a build, whatever. Must be re-runnable and must leave the repo ready for the tape. |
-| `preview.py` | A display helper this piece happens to need. Delete it if yours does not. |
+| `recipe` | One word: `playwright` or `vhs`. |
+| `setup.sh` | Two lines in practice: the import names you pass `ensure_venv`, and whatever the piece needs regenerated before recording. A non-Python piece replaces the `ensure_venv` call with its own build. Anything it deletes belongs under `--fresh` unless the piece itself owns it — every `make` target runs this file, so a wipe outside that flag is a wipe of the user's work. |
+| `scene.py` | The Playwright recipe's script: which files to open, which columns to show, what the narration says. The rendering is `lib/sheet.py` and is not yours to edit. |
+| `demo.tape` | The VHS recipe's tape. Delete it if you only want the browser one. |
 
-Leave `record.sh`, `lib/bootstrap.sh`, `lib/fetch.sh` and `lib/uv.sh` alone.
-They are the generic parts: fetching a pinned toolchain into `demo/.toolchain/`,
-running your setup, playing the tape, and checking the result.
-
-If your piece is also Python, `setup.sh` can keep its two lines of `lib/uv.sh`
-wiring as-is and you get the clean-machine bootstrap for free. If it is Node,
-apply the same rule there: fetch a pinned toolchain into `demo/.toolchain/`
-rather than assuming the machine has one.
-
-## Writing the tape
-
-`demo.tape` is [VHS tape syntax](https://github.com/charmbracelet/vhs#vhs-command-reference).
-The conventions worth keeping:
-
-- **Aim for 25 to 30 seconds.** `record.sh` rejects anything over 35.
-- **Set the height to fit the tallest screen, not the tallest total.** Use
-  `Hide` / `Type "clear"` / `Enter` / `Show` between beats. A short frame is
-  much more readable in a proposal thumbnail than a tall one with dead space.
-- **Hide the setup.** Activating a venv or exporting variables goes in a
-  `Hide` block so it never appears in the clip.
-- **`Sleep` after each `Enter`**, long enough to read the output. 3 to 4.5
-  seconds is about right for a table.
-- **Synthetic data only.** The tape runs against `samples/`, which is generated,
-  never against anything real. Check every frame before shipping.
+Leave `record.sh` and everything in `lib/` alone. If you find yourself editing
+one of those to make your piece work, the split is wrong — fix the split, do not
+fork the file. `python3 tools/demo_lib_drift.py` from the rookery root says
+whether you did.
 
 ## Toolchain
 
-`lib/bootstrap.sh` downloads into `demo/.toolchain/` (gitignored), nothing
-system-wide and no root:
+Everything lands in `demo/.toolchain/` (gitignored). Nothing system-wide, no
+root, versions pinned except where noted.
 
-| Tool | Pin | Why |
-| --- | --- | --- |
-| vhs | 0.10.0 | Records the terminal. **Pinned deliberately**: 0.12.x starts Chromium, captures every frame, then exits 0 having written no file at all on some Linux hosts. 0.10.0 encodes reliably. |
-| ttyd | 1.7.7 | The terminal vhs drives. A system `ttyd` is used if present. |
-| ffmpeg | 7.0.2 | Encodes the frames. Checksum-verified against a constant in `bootstrap.sh`, so a swapped tarball fails loudly instead of quietly changing what the clip looks like — what the clip looks like is a function of the encoder, and palettegen defaults move between releases. A system `ffmpeg` is used only if it reports this same version; the vendored build wins over it. |
+| File | Fetches | Pin | Why pinned |
+| --- | --- | --- | --- |
+| `lib/fetch.sh` | nothing itself | — | Every download below goes through it: a few attempts, a widening gap, and a message that separates "the host is having a moment" from "the URL is wrong". It exists because GitHub's release CDN returned HTTP 500 on the ttyd asset for a couple of minutes on 2026-09-11 and took `make demo` down with it. |
+| `lib/uv.sh` | uv | 0.12.13 | Checksum-verified against the published `.sha256`. |
+| `lib/python-venv.sh` | nothing directly | — | The venv ladder. Calls `lib/uv.sh` when the machine has no uv. |
+| `lib/ffmpeg.sh` | ffmpeg, ffprobe | 7.0.2 | Checksum-verified against a constant in the file, so a swapped tarball fails instead of quietly changing what the clip looks like — palettegen defaults move between releases. A system `ffmpeg` is used only if it reports the same version. |
+| `lib/playwright.sh` | the `playwright` wheel + Chromium | 1.47.0 | The recipe this piece records with. Playwright for *Python*, not Node: the wheel ships its own driver, so a machine with no Node can still regenerate the clip. |
+| `lib/vhs.sh` | vhs, ttyd | 0.10.0, 1.7.7 | The terminal sibling. **vhs deliberately**: 0.12.x starts Chromium, captures every frame, then exits 0 having written no file at all on some Linux hosts. 0.10.0 encodes reliably. |
+| `lib/chromium-libs.sh` | the shared objects Chromium links against | — | See below. |
 
-Every one of those downloads goes through `lib/fetch.sh`: a few attempts, a
-widening gap between them, and a message that separates "the host is having a
-moment" from "the URL is wrong". It exists because GitHub's release CDN returned
-HTTP 500 on the ttyd asset for a couple of minutes on 2026-09-11 and took
-`make demo` down with it. Failure is fatal for vhs, ttyd and ffmpeg — there is
-no recording without them — and a fallback for uv, which can still try
-`python3 -m venv`.
+`lib/uv.sh` applies the pinning rule to the *project's* toolchain, because a
+clean checkout is not a clean machine. Stock Ubuntu 24.04 has no `uv` and a
+`python3` with no `ensurepip` (that lives in the separate `python3-venv`
+package), so `setup.sh` would stop dead there and take `make test`, `make run`
+and `make demo` with it. It fetches a pinned uv into `demo/.toolchain/bin`, and
+uv then supplies the interpreter too, so the machine does not need a Python 3.12
+of its own.
 
-`lib/uv.sh` applies the same rule to the *project's* toolchain, because a clean
-checkout is not a clean machine. Stock Ubuntu 24.04 has no `uv` and a `python3`
-with no `ensurepip` (that lives in the separate `python3-venv` package), so
-`setup.sh` used to stop dead there and take `make test`, `make run` and
-`make demo` with it. It now fetches a pinned uv (0.12.13, checksum-verified
-against the published `.sha256`) into `demo/.toolchain/bin`. uv then supplies the
-interpreter too, so the machine does not need a python3.12 of its own. A system
-`uv` is used if present; the system `python3 -m venv` is the fallback if the
-fetch fails; the "install uv or python3-venv" error is the last resort.
-
-VHS renders through a headless Chromium it downloads itself into `~/.cache/rod`.
-On a server image that Chromium is usually missing a few shared libraries
-(`libnss3`, `libnspr4`, `libasound2`). `bootstrap.sh` detects exactly which ones
-are missing, fetches those `.deb`s with `apt-get download` (no root needed) and
-unpacks them into `demo/.toolchain/sysroot`. On a non-Debian host it prints the
-library names and stops instead of guessing.
-
-`./demo/record.sh --clean` throws the toolchain away and re-fetches it, which is
-how to verify the from-nothing path still works.
+Both recipes end up driving a headless Chromium, and on a server image that
+browser is missing the desktop libraries it links against. `playwright
+install-deps` and `apt-get install` both want root, which a demo script has no
+business asking for. So `lib/chromium-libs.sh` runs `ldd`, works out exactly
+which `.so` files are missing, fetches those `.deb`s with `apt-get download` (no
+root) and unpacks them into `demo/.toolchain/sysroot`. It loops up to three
+times, because unpacking one library reveals the next one down. On a non-Debian
+host it prints the library names and stops rather than guessing.
 
 ## Known limits
 
-- x86_64 Linux. The pinned ttyd and ffmpeg URLs are architecture-specific;
-  macOS would need `brew install vhs ttyd ffmpeg` and a small edit to
-  `bootstrap.sh`.
-- The first run downloads a headless Chromium into `~/.cache/rod`, which is most
-  of the wait. Measured from a dead clone with an empty `HOME` and
-  `PATH=/usr/bin:/bin`: about 75 s from nothing, about 47 s to re-record once
-  the toolchain is there. The download is the variable, not the recording.
+- **x86_64 Linux.** The pinned ttyd and ffmpeg URLs are architecture-specific.
+  macOS would need `brew install vhs ttyd ffmpeg` and a small edit.
+- **The first run downloads a browser.** Measured on the machine this was
+  recorded on: about 25 s to re-record once the toolchain is there, and the
+  first run adds a ~170 MB Chromium download on top. The download is the
+  variable, not the recording. The whole toolchain is 784 MB, all inside the
+  repo; `make clean` removes it.
+- **Synthetic data only.** Every invoice, vendor and customer in the clip is
+  invented and comes out of `samples/generate_samples.py`. Check every frame
+  before shipping.
