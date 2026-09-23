@@ -1,10 +1,13 @@
 [project]
 name = "pdf-to-csv"
 version = "0.1.0"
-description = "Extract structured invoice/receipt data from text-layer PDFs into a flat CSV."
+description = "Extract structured invoice/receipt data from text-layer PDFs into a flat CSV and an .xlsx."
 requires-python = ">=3.12"
 dependencies = [
     "pdfplumber==0.11.4",
+    # Every run with -o writes invoices.xlsx beside invoices.csv, so the
+    # workbook writer is not an extra and neither is this.
+    "openpyxl==3.1.5",
 ]
 
 [project.optional-dependencies]

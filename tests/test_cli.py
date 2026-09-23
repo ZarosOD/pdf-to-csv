@@ -6,9 +6,10 @@ import csv
 import io
 from pathlib import Path
 
-from pdf_to_csv.cli import main, summarise
-from pdf_to_csv.csv_out import COLUMNS, invoice_rows, write_csv
+from pdf_to_csv.cli import main, summarise, workbook_path
+from pdf_to_csv.csv_out import write_csv
 from pdf_to_csv.models import Invoice, LineItem
+from pdf_to_csv.table import COLUMNS, invoice_rows, invoices_table
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 SAMPLES = REPO_ROOT / "samples"
@@ -50,11 +51,33 @@ class TestCsvShape:
 
     def test_header_is_written_once(self):
         stream = io.StringIO()
-        count = write_csv([Invoice(source_file="a.pdf"), Invoice(source_file="b.pdf")], stream)
+        table = invoices_table([Invoice(source_file="a.pdf"), Invoice(source_file="b.pdf")])
+        count = write_csv(table, stream)
         lines = stream.getvalue().strip().splitlines()
         assert lines[0] == ",".join(COLUMNS)
         assert count == 2
         assert len(lines) == 3
+
+    def test_the_table_flags_the_rows_the_csv_column_flags(self):
+        """`flagged` and the needs_review column are one fact, read twice.
+
+        The workbook tints from `flagged` and the CSV spells it in a column;
+        they come from the same records, so a row cannot be doubtful in one
+        file and fine in the other.
+        """
+        clean = Invoice(
+            source_file="a.pdf",
+            vendor="A",
+            invoice_number="1",
+            invoice_date="2024-01-01",
+            subtotal=1.0,
+            tax=0.0,
+            total=1.0,
+            line_items=[LineItem("X", 1, 1.0, 1.0)],
+        )
+        table = invoices_table([clean, Invoice(source_file="b.pdf")])
+        from_column = {i for i, r in enumerate(table.records) if r["needs_review"] == "yes"}
+        assert table.flagged == frozenset(from_column) == {1}
 
 
 class TestSummary:
@@ -96,9 +119,32 @@ class TestMain:
         assert rows[0]["invoice_date"] == "2024-03-15"
         assert rows[0]["total"] == "563.98"
 
-    def test_writes_to_stdout_when_no_output_given(self, capsys):
+    def test_the_workbook_is_written_beside_the_csv_with_no_extra_flag(self, tmp_path):
+        """Both files, one run, no flag. The client gets the spreadsheet they
+        asked for and the pipeline keeps the CSV it already reads."""
+        out = tmp_path / "out.csv"
+        assert main([str(SAMPLES), "-o", str(out)]) == 0
+        assert out.is_file()
+        assert (tmp_path / "out.xlsx").is_file()
+
+    def test_the_workbook_goes_next_to_the_csv_whatever_it_is_called(self, tmp_path):
+        assert workbook_path(tmp_path / "invoices.csv") == tmp_path / "invoices.xlsx"
+        assert workbook_path(Path("march/books.csv")) == Path("march/books.xlsx")
+
+    def test_the_report_names_both_files(self, tmp_path, capsys):
+        out = tmp_path / "out.csv"
+        main([str(SAMPLES), "-o", str(out), "--report"])
+        report = capsys.readouterr().out
+        assert str(out) in report and str(tmp_path / "out.xlsx") in report
+        assert "76 rows" in report
+
+    def test_writes_to_stdout_when_no_output_given(self, capsys, tmp_path, monkeypatch):
+        """No -o, no workbook: there is nowhere to put it beside the CSV, and
+        a file in the working directory is one nobody asked for."""
+        monkeypatch.chdir(tmp_path)
         assert main([str(SAMPLES / "01_northwind_print.pdf")]) == 0
         assert "Northwind Print Co." in capsys.readouterr().out
+        assert list(tmp_path.iterdir()) == []
 
     def test_report_goes_to_stderr_when_csv_goes_to_stdout(self, capsys):
         main([str(SAMPLES / "01_northwind_print.pdf"), "--report"])

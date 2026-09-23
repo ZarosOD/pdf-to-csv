@@ -70,7 +70,8 @@ for the same reason the module is.
 **All four pieces use Playwright today**, and the reason is the grid above: a
 spreadsheet frame is a rendered page, and the terminal recipe cannot draw one.
 This piece records a browser twice over: it opens on a real page of a sample PDF
-and closes on `invoices.csv` in the grid. The VHS sibling is still live in every
+and closes on `invoices.xlsx` in the grid — the workbook the run wrote, read
+back through openpyxl. The VHS sibling is still live in every
 repo — `make demo-terminal` — because the choice is the point of `demo/recipe`
 and a recipe nobody can run is a recipe that has rotted.
 
@@ -93,7 +94,9 @@ command, and an AFTER that is held long enough to read:
    documents; this says what a document looks like, and it is the frame that
    makes "no per-vendor templates" mean something.
 3. **The command**, and the real stdout it printed.
-4. **AFTER** `invoices.csv` in the grid, with the flagged rows on screen.
+4. **AFTER** `invoices.xlsx` in the grid, with the flagged rows on screen. One
+   run writes the workbook and `invoices.csv` from the same rows; the clip
+   shows the one a client double-clicks.
 
 Beat 2 renders the page with `pypdfium2`, which `pdfplumber` already brings in,
 so it adds no dependency the piece did not have. A4 is 1:1.41 and the frame is

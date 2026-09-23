@@ -4,7 +4,7 @@ PY := .venv/bin/python
 
 help:
 	@echo "make setup    create .venv and install"
-	@echo "make run      extract samples/ into invoices.csv"
+	@echo "make run      extract samples/ into invoices.csv and invoices.xlsx"
 	@echo "make test     run the test suite"
 	@echo "make samples  regenerate the synthetic sample PDFs"
 	@echo "make demo     regenerate demo/out/demo.gif with Playwright, headless"
@@ -29,5 +29,5 @@ demo-terminal:
 	@DEMO_RECIPE=vhs DEMO_OUT_DIR=demo/out-terminal ./demo/record.sh
 
 clean:
-	rm -rf invoices.csv demo/out demo/out-terminal demo/.toolchain demo/.scratch .pytest_cache
+	rm -rf invoices.csv invoices.xlsx demo/out demo/out-terminal demo/.toolchain demo/.scratch .pytest_cache
 	find . -name __pycache__ -type d -prune -exec rm -rf {} +

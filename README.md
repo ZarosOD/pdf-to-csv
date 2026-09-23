@@ -1,8 +1,8 @@
 # PDF invoices → clean CSV
 
-Point it at a folder of invoice and receipt PDFs. Get back one CSV you can open
-in a spreadsheet, plus a one-line report saying which documents a human should
-look at.
+Point it at a folder of invoice and receipt PDFs. Get back one CSV you can pipe
+and one `.xlsx` you can double-click — the same rows in both — plus a one-line
+report saying which documents a human should look at.
 
 ![demo](demo/out/demo.gif)
 
@@ -29,11 +29,12 @@ make run
 ```
 
 `make run` creates the virtualenv, installs the dependencies and extracts every
-invoice in `samples/` into `invoices.csv`. It prints:
+invoice in `samples/` into `invoices.csv` **and `invoices.xlsx`**. It prints:
 
 ```
 12 files, 11 parsed clean, 1 needing review
   review  09_harborview_supplies_no_total.pdf: missing: total
+wrote invoices.csv and invoices.xlsx, 76 rows
 ```
 
 ```bash
@@ -59,8 +60,10 @@ that can run it.
 
 ## What the output looks like
 
-One row per line item, with the invoice-level fields repeated on each row, so it
-pivots and imports without reshaping.
+Two files, one set of rows: `invoices.csv` for anything that reads a pipe, and
+`invoices.xlsx` for the person who asked for a spreadsheet. One row per line
+item, with the invoice-level fields repeated on each row, so it pivots and
+imports without reshaping.
 
 ```
 source_file,vendor,invoice_number,invoice_date,currency,line_no,description,quantity,unit_price,line_total,subtotal,tax,total,needs_review,issues
@@ -71,6 +74,35 @@ source_file,vendor,invoice_number,invoice_date,currency,line_no,description,quan
 
 A document with no readable line items still gets exactly one row, so nothing
 disappears quietly.
+
+### The workbook
+
+`invoices.xlsx` holds those same rows on one sheet, `Invoices`. It is not a
+second extraction: both files are rendered from one table in
+`pdf_to_csv/table.py`, so there is no way for a column or a value to differ
+between them. What the workbook adds is what a CSV cannot carry — the money and
+quantity columns are real numbers you can sum (still printing their two
+decimals, so the cell reads `563.98` exactly as the CSV spells it), identifiers
+like `INV-2024-0417` and an invoice number of `0042` stay text, the header row
+freezes and filters, and **the flagged documents are tinted amber** so the rows
+needing a human are the ones you see first.
+
+It is written on every run with `-o`; there is no flag to ask for it and none to
+turn it off. Sent to stdout there is nowhere to put it, so `-o` is what gets you
+both.
+
+**The same input gives the same bytes.** An `.xlsx` is a zip, and zip members
+carry the time they were written; it is also an Office document, and openpyxl
+stamps the save time into `docProps/core.xml` whatever the workbook properties
+say. Both clocks are flattened to a fixed epoch (`xlsx_out._repack`), so:
+
+```
+$ make run && cp invoices.xlsx /tmp/before.xlsx && make run
+$ cmp /tmp/before.xlsx invoices.xlsx && echo identical
+identical
+```
+
+That is the difference between "trust me" and `cmp`.
 
 ## When it flags a document
 
@@ -96,7 +128,7 @@ extract.py <input-dir-or-pdf> [-o out.csv] [--report]
 
 | Flag | Effect |
 | --- | --- |
-| `-o, --output` | CSV file to write. Default is stdout, so it pipes. |
+| `-o, --output` | CSV file to write, with the `.xlsx` of the same name beside it. Default is stdout, so it pipes — and writes no workbook, because there is nowhere to put one. |
 | `--report` | Print `N files, M parsed clean, K needing review`, then one line per flagged document. Goes to stderr when the CSV is going to stdout. |
 | `--date-order` | How to read an all-numeric date where both readings are valid, e.g. `03/04/2024`. Default `mdy`. Unambiguous dates such as `15/03/2024` are read correctly either way and are not affected. |
 | `--fail-on-review` | Exit 1 if anything needs review. For running in a pipeline. |
@@ -146,10 +178,18 @@ page, which is what the end-to-end tests assert against.
 make test          # or: .venv/bin/python -m pytest -q
 ```
 
-253 tests, plus 4 that skip without `openpyxl`. `tests/test_parse.py` covers the parsing rules on plain text,
+279 tests. `tests/test_parse.py` covers the parsing rules on plain text,
 `tests/test_samples.py` checks every sample PDF against the generator's ground
 truth, and `tests/test_cli.py` covers the CSV shape, the report line and the
 exit codes.
+
+`tests/test_workbook.py` covers `invoices.xlsx`: that it holds the same header
+and the same values as the CSV read back off disk, that money is a number and
+quantity is not forced to two decimals, that the flagged rows are tinted, and
+that the bytes do not move when the clock does — the last one by repacking a
+copy with both clocks shifted, because writing the file twice inside one test
+lands both saves in the same second and would pass with nothing flattened at
+all.
 
 Three cover the recording rather than the tool. `tests/test_demo_outputs.py`
 checks it writes both the GIF and the MP4, including the case where `vhs` exits
@@ -166,7 +206,7 @@ it.
 `./demo/record.sh` regenerates the clip at the top of this file from scratch,
 headless, on the synthetic samples. It is a reusable pipeline with two recipes —
 a browser one and a terminal one — see [demo/README.md](demo/README.md). This
-piece uses the browser one, because the clip ends on `invoices.csv` open in a
+piece uses the browser one, because the clip ends on `invoices.xlsx` open in a
 spreadsheet grid and only a browser renders one. `make demo-terminal` records
 the terminal telling into `demo/out-terminal/`.
 
@@ -177,9 +217,10 @@ system-wide. `make clean` removes it.
 
 **Both ends of the clip are real files.** The opening frame renders page 1 of
 an actual `samples/*.pdf` with pypdfium2 — the document, not a picture of one.
-The closing frame opens the `invoices.csv` that the run in the middle just
-wrote and reads it off disk. If the run does not write it, the recording fails
-rather than showing you a table that was never extracted.
+The closing frame opens the `invoices.xlsx` that the run in the middle just
+wrote and reads it off disk — the workbook itself, through openpyxl, not a
+picture of one. If the run does not write it, the recording fails rather than
+showing you a table that was never extracted.
 
 ## Layout
 
@@ -188,7 +229,9 @@ extract.py                  CLI entry point
 pdf_to_csv/
   parse.py                  all the parsing rules, pure text in / data out
   pdf.py                    pdfplumber text extraction
-  csv_out.py                CSV shape
+  table.py                  the rows, defined once: both writers read this
+  csv_out.py                invoices.csv
+  xlsx_out.py               invoices.xlsx, and the two clocks it has to flatten
   cli.py                    argument handling and the report
   models.py                 Invoice / LineItem, and what counts as reviewable
 samples/generate_samples.py  writes the synthetic PDFs and the test ground truth

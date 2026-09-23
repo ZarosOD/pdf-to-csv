@@ -9,6 +9,8 @@ from pathlib import Path
 from .csv_out import write_csv, write_csv_file
 from .models import Invoice
 from .pdf import collect_pdfs, parse_pdf
+from .table import invoices_table
+from .xlsx_out import write_workbook
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -21,7 +23,8 @@ def build_parser() -> argparse.ArgumentParser:
         "-o",
         "--output",
         type=Path,
-        help="CSV file to write (default: stdout)",
+        help="CSV file to write (default: stdout). A workbook of the same rows "
+        "is written beside it, with the same name and an .xlsx extension.",
     )
     parser.add_argument(
         "--report",
@@ -41,6 +44,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="exit 1 if any document needs review (useful in a pipeline)",
     )
     return parser
+
+
+def workbook_path(output: Path) -> Path:
+    """Where the .xlsx goes: beside the CSV, same stem.
+
+    `-o invoices.csv` writes `invoices.xlsx`. There is no flag for it and no
+    way to ask for one without the other — one run, one set of rows, both
+    spellings of it, so the two files on disk can never be from different
+    runs.
+    """
+    return output.with_suffix(".xlsx")
 
 
 def summarise(invoices: list[Invoice]) -> str:
@@ -66,10 +80,20 @@ def main(argv: list[str] | None = None) -> int:
 
     invoices = [parse_pdf(path, args.date_order) for path in pdfs]
 
+    # One table, both writers. Neither output derives its own rows, so the CSV
+    # and the workbook cannot disagree about a column or a value.
+    table = invoices_table(invoices)
+
+    xlsx = None
     if args.output:
-        write_csv_file(invoices, args.output)
+        write_csv_file(table, args.output)
+        xlsx = workbook_path(args.output)
+        write_workbook(xlsx, table)
     else:
-        write_csv(invoices, sys.stdout)
+        # Going to stdout there is nowhere to put a workbook beside the CSV,
+        # and writing one into the working directory would be a file the user
+        # did not ask for. Name the output and get both.
+        write_csv(table, sys.stdout)
 
     if args.report:
         stream = sys.stdout if args.output else sys.stderr
@@ -80,6 +104,8 @@ def main(argv: list[str] | None = None) -> int:
                 if invoice.missing_fields:
                     detail.insert(0, "missing: " + ", ".join(invoice.missing_fields))
                 print(f"  review  {invoice.source_file}: {'; '.join(detail)}", file=stream)
+        if xlsx is not None:
+            print(f"wrote {args.output} and {xlsx}, {len(table)} rows", file=stream)
 
     if args.fail_on_review and any(i.needs_review for i in invoices):
         return 1

@@ -36,11 +36,13 @@ done
 
 # Generic: creates .venv however this machine allows, then proves the install
 # by importing what this project actually needs. See lib/python-venv.sh, which
-# fetches a pinned uv via lib/uv.sh when there is none. pdfplumber is the one
-# runtime dependency; reportlab is what writes the synthetic samples.
+# fetches a pinned uv via lib/uv.sh when there is none. pdfplumber and openpyxl
+# are the runtime dependencies — a run writes invoices.csv and invoices.xlsx,
+# and the clip's AFTER frame opens the workbook, so a venv without openpyxl
+# cannot record. reportlab is what writes the synthetic samples.
 # shellcheck source=lib/python-venv.sh
 . "$DEMO_DIR/lib/python-venv.sh"
-ensure_venv .venv "pdfplumber reportlab"
+ensure_venv .venv "pdfplumber openpyxl reportlab"
 
 PY=".venv/bin/python"
 
@@ -55,13 +57,15 @@ fi
 # nothing in it is anyone's output.
 rm -rf demo/.scratch
 
-# invoices.csv belongs to whoever last ran the tool. It matters to the
-# recording because the scene opens it as the AFTER frame, so a file left
-# behind by an older run would be filmed as though this run produced it.
+# invoices.csv and invoices.xlsx belong to whoever last ran the tool. It
+# matters to the recording because the scene opens the workbook as the AFTER
+# frame, so a file left behind by an older run would be filmed as though this
+# run produced it. Both go, not just the one on screen: leaving the CSV would
+# leave half of what the command on screen claims to have written.
 # --fresh is the recording saying "this scene must open on an empty repo", not
 # a general-purpose clean; `make clean` is the one the reader can ask for by
 # name.
 if [ "$FRESH" = 1 ]; then
-  log "removing invoices.csv so the recorded run really is a first run"
-  rm -f invoices.csv
+  log "removing invoices.csv and invoices.xlsx so the recorded run really is a first run"
+  rm -f invoices.csv invoices.xlsx
 fi

@@ -10,11 +10,14 @@ Four beats, about 18 seconds, in the one shape all four clips use:
               documents; this says what a document looks like, and it is the
               frame that makes "no per-vendor templates" mean something.
   3. COMMAND  one line, and the real stdout it printed.
-  4. AFTER    invoices.csv in the grid, with the flagged rows on screen.
+  4. AFTER    invoices.xlsx in the grid, with the flagged rows on screen.
 
-Beat 4 opens the file beat 3 had just written, read off disk at record time.
-Nothing in this file knows what is in that CSV; if extract.py did not write it,
-`read_table` raises and there is no clip.
+Beat 4 opens the workbook beat 3 had just written, read off disk at record
+time — the file a client double-clicks rather than the CSV they would have to
+import. One command writes both, from one set of rows; `invoices.csv` is
+unchanged and is what a pipeline reads. Nothing in this file knows what is in
+the workbook; if extract.py did not write it, `read_table` raises and there is
+no clip.
 
 Beat 2 renders the sample PDF itself with pypdfium2, which pdfplumber already
 brings in — the page on screen is the file in samples/, not a picture of an
@@ -41,8 +44,11 @@ import sheet  # noqa: E402
 SHOWN = "01_northwind_print.pdf"
 
 # Invoice-level fields plus the line item, which is the shape a client checks
-# first: did it get the header right, and did it get the lines under it.
-CSV_COLUMNS = [
+# first: did it get the header right, and did it get the lines under it. The
+# workbook and the CSV hold the same columns — one `Table` renders both — so
+# this list names the sheet and the file next to it at the same time.
+SHEET = "Invoices"
+COLUMNS = [
     "source_file", "invoice_number", "invoice_date", "description",
     "quantity", "unit_price", "line_total", "total", "needs_review", "issues",
 ]
@@ -117,10 +123,10 @@ def record(video_dir: Path) -> Path:
         cwd=REPO,
     )
 
-    rows = sheet.read_table(REPO / "invoices.csv", base=REPO)
+    rows = sheet.read_table(REPO / "invoices.xlsx", SHEET, base=REPO)
     flagged = sheet.rows_where(rows, "needs_review", "yes")
     after = sheet.tint(
-        sheet.view(rows, CSV_COLUMNS, rows=sheet.head_and(rows, flagged), widths=WIDTHS),
+        sheet.view(rows, COLUMNS, rows=sheet.head_and(rows, flagged), widths=WIDTHS),
         flagged,
         "flag",
     )
@@ -148,7 +154,7 @@ def record(video_dir: Path) -> Path:
         scene.show(
             sheet.terminal_html(
                 command,
-                said="one command: read every page, write one CSV",
+                said="one command: read every page, write the CSV and the workbook",
             ),
             sheet.HOLD_COMMAND,
         )
@@ -156,7 +162,7 @@ def record(video_dir: Path) -> Path:
             sheet.grid_html(
                 after,
                 step="AFTER",
-                said="invoices.csv, opened — header fields and the lines under them",
+                said="invoices.xlsx, opened — header fields and the lines under them",
                 legend={"flag": f"{len(flagged)} rows flagged: a field it would not guess"},
             ),
             sheet.HOLD_AFTER,

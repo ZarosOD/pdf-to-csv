@@ -5,6 +5,7 @@ __pycache__/
 .pytest_cache/
 /build/
 invoices.csv
+invoices.xlsx
 
 # Fetched toolchains and demo scratch. demo/out/ is committed on purpose: the
 # clip is part of the deliverable. demo/out-terminal/ is the VHS sibling's
