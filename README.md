@@ -191,7 +191,7 @@ copy with both clocks shifted, because writing the file twice inside one test
 lands both saves in the same second and would pass with nothing flattened at
 all.
 
-Three cover the recording rather than the tool. `tests/test_demo_outputs.py`
+Four cover the recording rather than the tool. `tests/test_demo_outputs.py`
 checks it writes both the GIF and the MP4, including the case where `vhs` exits
 `0` having skipped one. `tests/test_demo_fetch.py` drives the download retry
 ladder in `demo/lib/fetch.sh` against a `curl` shim that fails a scripted
@@ -199,7 +199,12 @@ number of times. `tests/test_demo_sheet.py` covers the shared spreadsheet
 renderer in `demo/lib/sheet.py`: that it refuses to render a file that is not
 on disk, that a filtered view keeps the source file's own column letters and
 row numbers, and that the command on screen is the one whose output is under
-it.
+it. `tests/test_readme_clip.py` reads the clip-length sentence below back off
+the committed `demo/out/demo.gif` and `demo/out/demo.mp4` — it parses the
+numbers out of this file rather than restating them, so a re-record that moves
+the clip and leaves the prose behind fails there. Its duration readers are
+stdlib, because a dead clone has no `ffprobe`, and they are pinned against
+hand-built mp4 and gif headers.
 
 ## Recording the demo
 
@@ -216,6 +221,13 @@ Chromium download on top, which I have not timed, so the wall clock for a first
 `make demo` is the one number here I cannot give you. The whole toolchain is
 760 MB inside `demo/.toolchain/` — 549 MB of that the unpacked Chromium — none
 of it installed system-wide. `make clean` removes it.
+
+The clip is 18 s against a 35 s budget that `record.sh` enforces by reading the
+encoded file, so the guard is real rather than a note about not shipping a
+two-minute GIF. That sentence is itself checked:
+`tests/test_readme_clip.py` parses the two numbers out of this file and reads
+the duration back off the committed `demo/out/demo.gif` and `demo/out/demo.mp4`,
+so a re-record that moves the clip and leaves the README behind fails the suite.
 
 **Both ends of the clip are real files.** The opening frame renders page 1 of
 an actual `samples/*.pdf` with pypdfium2 — the document, not a picture of one.
