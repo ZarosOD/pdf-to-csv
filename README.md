@@ -178,7 +178,10 @@ page, which is what the end-to-end tests assert against.
 make test          # or: .venv/bin/python -m pytest -q
 ```
 
-279 tests. `tests/test_parse.py` covers the parsing rules on plain text,
+304 tests, two of which skip in a dead clone — the `ffprobe` cross-check in
+`tests/test_readme_clip.py`, which needs a toolchain `make demo` downloads.
+They are the suite's only skips and they are a cross-check, not a guard.
+`tests/test_parse.py` covers the parsing rules on plain text,
 `tests/test_samples.py` checks every sample PDF against the generator's ground
 truth, and `tests/test_cli.py` covers the CSV shape, the report line and the
 exit codes.
