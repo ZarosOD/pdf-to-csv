@@ -178,7 +178,7 @@ page, which is what the end-to-end tests assert against.
 make test          # or: .venv/bin/python -m pytest -q
 ```
 
-304 tests, two of which skip in a dead clone — the `ffprobe` cross-check in
+335 tests, two of which skip in a dead clone — the `ffprobe` cross-check in
 `tests/test_readme_clip.py`, which needs a toolchain `make demo` downloads.
 They are the suite's only skips and they are a cross-check, not a guard.
 `tests/test_parse.py` covers the parsing rules on plain text,
@@ -208,6 +208,29 @@ numbers out of this file rather than restating them, so a re-record that moves
 the clip and leaves the prose behind fails there. Its duration readers are
 stdlib, because a dead clone has no `ffprobe`, and they are pinned against
 hand-built mp4 and gif headers.
+
+`tests/test_readme_counts.py` does the same to the count at the top of this
+section, and to the skip figure beside it: it reads both back off `pytest
+--collect-only`, and the skip figure off the ffprobe cross-check's own
+parametrised count rather than a number typed twice. It is here because that
+count had gone stale twice in two weeks, both times in a commit that added
+tests — the number nobody can see is the number nobody updates.
+
+### The numbers a test cannot guard
+
+```bash
+make timings          # measure them, and diff them against this file
+make timings ARGS="--list"
+```
+
+A test count is deterministic, so it is guarded above. The wall clocks and disk
+sizes in this file are not: they move with the machine, the network and the
+pinned versions. Asserting them in the suite would buy a flaky one rather than
+a guard, so they get `tools/timings.py` instead — a target run by hand before a
+push, never in CI, which re-measures each of them, prints the sentence in this
+README that states it, and says whether the two still agree. It exits non-zero
+when they do not, so `make` reports `Error 1`; that is the verdict arriving, not
+a crash.
 
 ## Recording the demo
 
