@@ -241,8 +241,8 @@ piece uses the browser one, because the clip ends on `invoices.xlsx` open in a
 spreadsheet grid and only a browser renders one. `make demo-terminal` records
 the terminal telling into `demo/out-terminal/`.
 
-Measured on this machine: **23 seconds** to re-record once the toolchain is
-there (22.8, 22.8, 22.8 over three runs); the first run adds the headless
+Measured on this machine: **about 25 seconds** to re-record once the toolchain
+is there — 24.4, 24.6 and 26.2 s over three runs; the first run adds the headless
 Chromium download on top, which I have not timed, so the wall clock for a first
 `make demo` is the one number here I cannot give you. The whole toolchain is
 760 MB inside `demo/.toolchain/` — 549 MB of that the unpacked Chromium — none
