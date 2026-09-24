@@ -264,6 +264,12 @@ two-minute GIF. That sentence is itself checked:
 the duration back off the committed `demo/out/demo.gif` and `demo/out/demo.mp4`,
 so a re-record that moves the clip and leaves the README behind fails the suite.
 
+`record.sh` also refuses a take whose encodes do not *end* on the held final
+shot. `demo/lib/lastframe.py` decodes each encode from the first frame and
+requires the last second to be one picture, which is what catches a leaked
+capture frame landing on the frame a player holds after playback stops — the
+frame that is left on screen, and the one nothing used to check.
+
 **Both ends of the clip are real files.** The opening frame renders page 1 of
 an actual `samples/*.pdf` with pypdfium2 — the document, not a picture of one.
 The closing frame opens the `invoices.xlsx` that the run in the middle just
