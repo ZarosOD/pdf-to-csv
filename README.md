@@ -241,12 +241,13 @@ piece uses the browser one, because the clip ends on `invoices.xlsx` open in a
 spreadsheet grid and only a browser renders one. `make demo-terminal` records
 the terminal telling into `demo/out-terminal/`.
 
-Measured on this machine: **about 25 seconds** to re-record once the toolchain
-is there — 24.4, 24.6 and 26.2 s over three runs; the first run adds the headless
-Chromium download on top, which I have not timed, so the wall clock for a first
-`make demo` is the one number here I cannot give you. The whole toolchain is
-760 MB inside `demo/.toolchain/` — 549 MB of that the unpacked Chromium — none
-of it installed system-wide. `make clean` removes it.
+Measured on this machine: **24 to 26 seconds** to re-record once the toolchain
+is there — 24.1, 24.1, 24.3, 24.4, 24.6 and 26.2 s over six runs in two passes;
+the first run adds the headless Chromium download on top, which I have not
+timed, so the wall clock for a first `make demo` is the one number here I
+cannot give you. The whole toolchain is 760 MB inside `demo/.toolchain/` —
+549 MB of that the unpacked Chromium — none of it installed system-wide.
+`make clean` removes it.
 
 The clip is 18 s against a 35 s budget that `record.sh` enforces by reading the
 encoded file, so the guard is real rather than a note about not shipping a
