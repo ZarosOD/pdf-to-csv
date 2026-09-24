@@ -215,8 +215,10 @@ host it prints the library names and stops rather than guessing.
   recorded on: about 23 s to re-record once the toolchain is there (22.8, 22.8,
   22.8 over three runs), and the first run adds the Chromium download on top,
   which has not been timed — the download is the variable, not the recording.
-  The whole toolchain is 760 MB, 549 MB of it the unpacked Chromium, all inside
-  the repo; `make clean` removes it.
+  What `make demo` leaves is 762 MB, 549 MB of it the unpacked Chromium, all
+  inside the repo; `make demo-terminal` adds 24 MB more to the same directory
+  and a second Chromium under `~/.cache/rod`, which is outside it. `make clean`
+  removes `demo/.toolchain/`, not `~/.cache/rod`.
 - **Synthetic data only.** Every invoice, vendor and customer in the clip is
   invented and comes out of `samples/generate_samples.py`. Check every frame
   before shipping.

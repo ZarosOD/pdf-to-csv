@@ -252,10 +252,12 @@ that range: drawing the card and prepending 0.8 s to two encodes cost less than
 the spread between the six.
 The first run adds the headless Chromium download on top, which I have not
 timed, so the wall clock for a first `make demo` is the one number here I
-cannot give you. The whole toolchain is 762 MB inside `demo/.toolchain/` —
+cannot give you. `make demo` leaves 762 MB inside `demo/.toolchain/` —
 549 MB of that the unpacked Chromium, and 2 MB the typeface
 `demo/lib/fonts.sh` pins for the title card — none of it installed
-system-wide. `make clean` removes it.
+system-wide. That is the Playwright recipe alone; `make demo-terminal` adds
+24 MB more to the same directory and a second Chromium under `~/.cache/rod`.
+`make clean` removes `demo/.toolchain/`.
 
 The clip is 19 s against a 35 s budget that `record.sh` enforces by reading the
 encoded file, so the guard is real rather than a note about not shipping a
