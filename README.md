@@ -178,9 +178,13 @@ page, which is what the end-to-end tests assert against.
 make test          # or: .venv/bin/python -m pytest -q
 ```
 
-335 tests, two of which skip in a dead clone — the `ffprobe` cross-check in
-`tests/test_readme_clip.py`, which needs a toolchain `make demo` downloads.
-They are the suite's only skips and they are a cross-check, not a guard.
+348 tests, four of which skip in a dead clone: the two `ffprobe` cross-checks in
+`tests/test_readme_clip.py`, and in `tests/test_demo_card.py` the comparison of
+`demo/out/poster.png` against frame 0 of the mp4 and the proof that the title
+card's typeface is the vendored one. All four want something `make demo`
+downloads, and all four are cross-checks rather than guards: the guard each one
+backs up runs anyway, over `demo/out/demo.gif` — the file this README embeds —
+which is read end to end with nothing but the standard library.
 `tests/test_parse.py` covers the parsing rules on plain text,
 `tests/test_samples.py` checks every sample PDF against the generator's ground
 truth, and `tests/test_cli.py` covers the CSV shape, the report line and the
@@ -242,14 +246,18 @@ spreadsheet grid and only a browser renders one. `make demo-terminal` records
 the terminal telling into `demo/out-terminal/`.
 
 Measured on this machine: **24 to 26 seconds** to re-record once the toolchain
-is there — 24.1, 24.1, 24.3, 24.4, 24.6 and 26.2 s over six runs in two passes;
-the first run adds the headless Chromium download on top, which I have not
+is there — 24.1, 24.1, 24.3, 24.4, 24.6 and 26.2 s over six runs in two passes,
+and 25.0 s on one run after the title card joined both encodes, which is inside
+that range: drawing the card and prepending 0.8 s to two encodes cost less than
+the spread between the six.
+The first run adds the headless Chromium download on top, which I have not
 timed, so the wall clock for a first `make demo` is the one number here I
-cannot give you. The whole toolchain is 760 MB inside `demo/.toolchain/` —
-549 MB of that the unpacked Chromium — none of it installed system-wide.
-`make clean` removes it.
+cannot give you. The whole toolchain is 762 MB inside `demo/.toolchain/` —
+549 MB of that the unpacked Chromium, and 2 MB the typeface
+`demo/lib/fonts.sh` pins for the title card — none of it installed
+system-wide. `make clean` removes it.
 
-The clip is 18 s against a 35 s budget that `record.sh` enforces by reading the
+The clip is 19 s against a 35 s budget that `record.sh` enforces by reading the
 encoded file, so the guard is real rather than a note about not shipping a
 two-minute GIF. That sentence is itself checked:
 `tests/test_readme_clip.py` parses the two numbers out of this file and reads

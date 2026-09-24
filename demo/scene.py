@@ -25,6 +25,13 @@ invoice.
 
 The invoices are invented. No real vendor, customer or client data appears here
 or in the recording.
+
+Ahead of beat 1, `demo/lib/card.py` prepends a 0.8 s title card composed from
+two of the frames below — the before artifact on the left, the after one on the
+right. It is not a beat: the scene is unchanged and the card is a prepend plus
+a `demo/out/poster.png` export. The two labels and the two lines of specifics
+under them are the only part of it that belongs to this piece, and they are
+just below.
 """
 
 from __future__ import annotations
@@ -110,7 +117,17 @@ def page_png(pdf_path: Path, scale: float = 2.0,
     return buffer.getvalue(), cropped
 
 
-def record(video_dir: Path) -> Path:
+# The title card's two labels. Its shape, colours and typeface are
+# demo/lib/card.py, which is shared and byte-identical in all four repos; the
+# words are here because what this piece turns its input into is a fact about
+# this piece, not about the pipeline.
+# The line under each label is built from the run's own tables below, so
+# adding a sample moves the card exactly the way it moves the clip.
+CARD_BEFORE_LABEL = "Twelve vendors, twelve layouts"
+CARD_AFTER_LABEL = "One workbook, one CSV"
+
+
+def record(video_dir: Path, poster: Path | None = None) -> Path:
     samples = REPO / "samples"
 
     # Both BEFORE beats are built before the tool runs, so neither can be
@@ -131,7 +148,7 @@ def record(video_dir: Path) -> Path:
         "flag",
     )
 
-    with sheet.Scene(video_dir) as scene:
+    with sheet.Scene(video_dir, poster=poster) as scene:
         scene.show(
             sheet.grid_html(
                 listing,
@@ -151,6 +168,14 @@ def record(video_dir: Path) -> Path:
             ),
             sheet.HOLD_BEFORE / 2,
         )
+        # The rendered page, not the file listing: a column of filenames and a
+        # grid of cells are the same grey rectangle at thumbnail size, and an
+        # invoice is recognisable at any size.
+        scene.panel(
+            "before", CARD_BEFORE_LABEL,
+            f"{len(listing.table.rows)} PDFs"
+            " | no template written for any of them",
+        )
         scene.show(
             sheet.terminal_html(
                 command,
@@ -167,6 +192,11 @@ def record(video_dir: Path) -> Path:
             ),
             sheet.HOLD_AFTER,
         )
+        scene.panel(
+            "after", CARD_AFTER_LABEL,
+            f"{len(rows.rows)} rows | {len(rows.headers)} fields per invoice"
+            f" | {len(flagged)} flagged, nothing guessed",
+        )
 
     return scene.video_path
 
@@ -174,10 +204,12 @@ def record(video_dir: Path) -> Path:
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--video-dir", required=True, type=Path)
+    parser.add_argument("--poster", type=Path,
+                        help="write the title card here as PNG (demo/lib/card.py)")
     args = parser.parse_args(argv)
 
     args.video_dir.mkdir(parents=True, exist_ok=True)
-    print(record(args.video_dir))
+    print(record(args.video_dir, args.poster))
     return 0
 
 
