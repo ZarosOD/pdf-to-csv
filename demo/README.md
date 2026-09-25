@@ -22,17 +22,18 @@ as a single static first frame.
 **This piece was the last one on the old pipeline.** It shipped before
 `demo/lib/` was split into recipes, so it carried a single `lib/bootstrap.sh`
 that fetched vhs, ttyd and ffmpeg, and a `record.sh` that played a tape rather
-than picking a recipe. Seven entries in `tools/demo_lib_drift.py`'s `EXCEPTIONS`
-existed to say so. It now carries the same `record.sh` and the same `lib/` as
-the other three, `bootstrap.sh` is gone, and those seven exceptions are gone
-with it — an exception whose reason has been fixed is not a note, it is a hole
-that will excuse the next real difference.
+than picking a recipe. Seven declared exceptions in the maintainers' drift
+checker existed to say so. It now carries the same `record.sh` and the same
+`lib/` as the other three, `bootstrap.sh` is gone, and those seven exceptions
+are gone with it — an exception whose reason has been fixed is not a note, it
+is a hole that will excuse the next real difference.
 
 ## The spreadsheet renderer, `lib/sheet.py`
 
 All four pieces end their clip on the file the run just wrote, open in a
 spreadsheet grid. That is one job, so it is one file — shared, byte-identical
-everywhere, and policed by `tools/demo_lib_drift.py` like the rest of `lib/`.
+everywhere, and policed like the rest of `lib/` by a drift checker that lives
+in the maintainers' working tree and does not ship inside this repo.
 What stays per-piece is `scene.py`: which files this piece opens, which of its
 columns are worth showing, and what the narration says.
 
@@ -172,8 +173,8 @@ Copy the whole `demo/` folder. Then change **these files and nothing else**:
 
 Leave `record.sh` and everything in `lib/` alone. If you find yourself editing
 one of those to make your piece work, the split is wrong — fix the split, do not
-fork the file. `python3 tools/demo_lib_drift.py` from the rookery root says
-whether you did.
+fork the file. A drift checker in the maintainers' working tree says whether
+you did; it is not part of this repo, so there is nothing here for you to run.
 
 ## Toolchain
 
