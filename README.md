@@ -178,7 +178,7 @@ page, which is what the end-to-end tests assert against.
 make test          # or: .venv/bin/python -m pytest -q
 ```
 
-348 tests, four of which skip in a dead clone: the two `ffprobe` cross-checks in
+350 tests, four of which skip in a dead clone: the two `ffprobe` cross-checks in
 `tests/test_readme_clip.py`, and in `tests/test_demo_card.py` the comparison of
 `demo/out/poster.png` against frame 0 of the mp4 and the proof that the title
 card's typeface is the vendored one. All four want something `make demo`
@@ -200,7 +200,9 @@ all.
 
 Four cover the recording rather than the tool. `tests/test_demo_outputs.py`
 checks it writes both the GIF and the MP4, including the case where `vhs` exits
-`0` having skipped one. `tests/test_demo_fetch.py` drives the download retry
+`0` having skipped one, and — on the other side — that `demo/out-terminal/` is in
+neither the index nor the committed tree, so the VHS sibling's output cannot be
+published stale behind a `.gitignore` line that cannot un-track it. `tests/test_demo_fetch.py` drives the download retry
 ladder in `demo/lib/fetch.sh` against a `curl` shim that fails a scripted
 number of times. `tests/test_demo_sheet.py` covers the shared spreadsheet
 renderer in `demo/lib/sheet.py`: that it refuses to render a file that is not
